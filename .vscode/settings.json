@@ -1,0 +1,40 @@
+{
+  "files.associations": {
+    "stdio.h": "c",
+    "cstdio": "cpp",
+    "nakama.h": "c",
+    "nrtclient.h": "c",
+    "iosfwd": "c",
+    "sad": "c",
+    "algorithm": "c",
+    "iterator": "c",
+    "xhash": "c",
+    "xmemory": "c",
+    "xtree": "c",
+    "xutility": "c"
+  },
+  "files.insertFinalNewline": true,
+  "zig.zigPath": "D:/Tools/zig-binaries/zig-windows-x86_64-0.11.0-dev.3106+3062f9b02/zig.exe",
+  "zls.zig_exe_path": "D:/Tools/zig-binaries/zig-windows-x86_64-0.11.0-dev.3106+3062f9b02/zig.exe",
+  "zls.path": "D:/Projects/Personal/zls/zig-out/bin/zls.exe",
+  "[zig]": {
+    "editor.defaultFormatter": "tiehuis.zig",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+  },
+  "files.exclude": {
+    "zig-cache/": true,
+    "zig-out/": true
+  },
+  "clang-format.style": "file",
+  "[cpp]": {
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.formatOnSave": true,
+  },
+  "[c]": {
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.formatOnSave": true,
+  },
+  "cmake.sourceDirectory": "${workspaceFolder}/headless-client",
+  "cmake.configureOnOpen": true
+}

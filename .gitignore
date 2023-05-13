@@ -1,0 +1,4 @@
+zig-cache
+zig-out
+src/engine/zig-out
+src/engine/zig-cache

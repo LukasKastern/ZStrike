@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "tests",
+      "type": "cppdbg",
+      "windows": {
+        "type": "cppvsdbg"
+      },
+      "request": "launch",
+      "program": "${workspaceFolder}/zig-out/bin/test",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build tests",
+    },
+    {
+      "name": "client",
+      "type": "cppdbg",
+      "windows": {
+        "type": "cppvsdbg"
+      },
+      "request": "launch",
+      "program": "${workspaceFolder}/zig-out/bin/ZStrike.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build client",
+    },
+    {
+      "name": "Engine",
+      "type": "cppdbg",
+      "windows": {
+        "type": "cppvsdbg"
+      },
+      "request": "launch",
+      "program": "${workspaceFolder}/src/engine/zig-out/bin/test-engine.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+  ],
+  "inputs": []
+}
