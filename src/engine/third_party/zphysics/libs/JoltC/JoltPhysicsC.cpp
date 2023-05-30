@@ -2144,6 +2144,11 @@ JPC_CharacterVirtualSettings_Create()
     return toJpc(settings);
 }
 
+JPC_API void
+JPC_CharacterVirtualSettings_SetShape(JPC_CharacterVirtualSettings *in_settings, JPC_Shape *in_shape) {
+    toJph(in_settings)->mShape = toJph(in_shape);
+}
+
 JPC_API void 
 JPC_CharacterVirtualSettings_Release(JPC_CharacterVirtualSettings *in_settings) 
 {
@@ -2189,3 +2194,51 @@ JPC_API void
 JPC_CharacterVirtual_SetRotation(JPC_CharacterVirtual *in_character, const float in_rotation[4]) {
     toJph(in_character)->SetRotation(JPH::Quat(loadVec4(in_rotation)));
 }
+
+JPC_API void
+JPC_CharacterVirtual_GetLinearVelocity(const JPC_CharacterVirtual *in_character, JPC_Real out_velocity[3]) 
+{
+    storeRVec3(out_velocity, toJph(in_character)->GetLinearVelocity()); 
+}
+
+JPC_API void
+JPC_CharacterVirtual_SetLinearVelocity(JPC_CharacterVirtual *in_character, const JPC_Real in_velocity[3]) 
+{
+    toJph(in_character)->SetLinearVelocity(loadRVec3(in_velocity));
+}
+
+JPC_API void
+JPC_CharacterVirtual_GetUp(const JPC_CharacterVirtual *in_character, JPC_Real out_up[3]) 
+{
+    storeRVec3(out_up, toJph(in_character)->GetUp()); 
+}
+
+JPC_API void
+JPC_CharacterVirtual_SetUp(JPC_CharacterVirtual *in_character, const JPC_Real in_up[3]) 
+{
+    toJph(in_character)->SetUp(loadRVec3(in_up));
+}
+
+JPC_API void
+JPC_CharacterVirtual_ExtendedUpdate(JPC_CharacterVirtual *in_character, 
+    float delta_time, 
+    const JPC_Real gravity[3], 
+    const JPC_CharacterVirtual_ExtendedUpdateSettings *update_settings, 
+    JPC_BroadPhaseLayer broadphase_layer, 
+    JPC_ObjectLayer object_layer, 
+    JPC_TempAllocator *temp_allocator, 
+    JPC_PhysicsSystem *physics_system)
+{
+    auto jolt_physics_system = toJph(physics_system);
+    auto jolt_character = toJph(in_character);
+
+    jolt_character->ExtendedUpdate(delta_time, 
+        loadRVec3(gravity), 
+        *reinterpret_cast<const JPH::CharacterVirtual::ExtendedUpdateSettings*>(update_settings), 
+        jolt_physics_system->GetDefaultBroadPhaseLayerFilter(broadphase_layer), 
+        jolt_physics_system->GetDefaultLayerFilter(object_layer), 
+        {}, 
+        {}, 
+        *reinterpret_cast<JPH::TempAllocator *>(temp_allocator)
+    );
+} 

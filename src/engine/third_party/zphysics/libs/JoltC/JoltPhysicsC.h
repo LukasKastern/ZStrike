@@ -426,6 +426,18 @@ typedef struct JPC_RayCastSettings
     JPC_BackFaceMode back_face_mode;
     bool             treat_convex_as_solid;
 } JPC_RayCastSettings;
+
+
+typedef struct JPC_CharacterVirtual_ExtendedUpdateSettings 
+{
+    JPC_RVEC_ALIGN JPC_Real stick_to_floor_step_down[4];
+    JPC_RVEC_ALIGN JPC_Real walk_stairs_step_up[4];
+    float walk_stairs_min_step_forward;
+    float walk_stairs_step_forward_test;
+    float walk_stairs_cos_angle_forward_contact;
+    JPC_RVEC_ALIGN JPC_Real walk_stairs_step_down_extra[4];
+} JPC_CharacterVirtual_ExtendedUpdateSettings;
+
 //--------------------------------------------------------------------------------------------------
 //
 // Interfaces (virtual tables)
@@ -1409,6 +1421,9 @@ JPC_BodyID_IsInvalid(JPC_BodyID in_body_id);
 JPC_API JPC_CharacterVirtualSettings*
 JPC_CharacterVirtualSettings_Create();
 
+JPC_API void 
+JPC_CharacterVirtualSettings_SetShape(JPC_CharacterVirtualSettings *in_settings, JPC_Shape* in_shape);
+    
 JPC_API void
 JPC_CharacterVirtualSettings_Release(JPC_CharacterVirtualSettings *in_settings);
     
@@ -1434,7 +1449,22 @@ JPC_CharacterVirtual_GetRotation(const JPC_CharacterVirtual *in_character, float
 
 JPC_API void
 JPC_CharacterVirtual_SetRotation(JPC_CharacterVirtual *in_character, const float in_rotation[4]);
-    
+
+JPC_API void
+JPC_CharacterVirtual_GetLinearVelocity(const JPC_CharacterVirtual *in_character, JPC_Real out_velocity[3]);
+
+JPC_API void
+JPC_CharacterVirtual_SetLinearVelocity(JPC_CharacterVirtual *in_character, const JPC_Real in_velocity[3]);
+
+JPC_API void
+JPC_CharacterVirtual_GetUp(const JPC_CharacterVirtual *in_character, JPC_Real out_up[3]);
+
+JPC_API void
+JPC_CharacterVirtual_SetUp(JPC_CharacterVirtual *in_character, const JPC_Real in_up[3]);
+
+JPC_API void
+JPC_CharacterVirtual_ExtendedUpdate(JPC_CharacterVirtual *in_character, float delta_time, const JPC_Real gravity[3], const JPC_CharacterVirtual_ExtendedUpdateSettings *update_settings, JPC_BroadPhaseLayer broadphase_layer, JPC_ObjectLayer object_layer, JPC_TempAllocator *temp_allocator, JPC_PhysicsSystem *physics_system); 
+
 #ifdef __cplusplus
 }
 #endif

@@ -8,6 +8,7 @@ const zm = Engine.zm;
 const ecs = Engine.ecs;
 const std = @import("std");
 
+const Character = @import("Character.zig");
 const FollowEntity = @import("FollowEntity.zig");
 const DefaultMap = @import("DefaultMap.zig");
 
@@ -96,6 +97,7 @@ pub fn main() !void {
 
     try DefaultMap.SpawnEntites(world);
     FollowEntity.init(world);
+    Character.init(world);
 
     {
         var spawn_cube_system_desc = ecs.system_desc_t{ .callback = spawnCube };
@@ -131,6 +133,10 @@ pub fn main() !void {
         });
 
         ecs.add_pair(world, player, ecs.id(world, Renderer.ShaderRef), pbr_shader);
+
+        _ = ecs.set(world, player, Character.CharacterController, .{ .physics_character = null });
+
+        _ = ecs.set(world, player, Core.Gameplay.ControlEntity, .{ .priority = 0 });
     }
 
     var camera = ecs.new_entity(world, "First Person Camera");

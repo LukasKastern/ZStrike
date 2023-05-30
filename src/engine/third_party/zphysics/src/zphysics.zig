@@ -2271,6 +2271,13 @@ pub const CharacterVirtualSettings = opaque {
         return @ptrCast(*CharacterVirtualSettings, character_virtual_settings);
     }
 
+    pub fn setShape(in_settings: *CharacterVirtualSettings, in_shape: *Shape) void {
+        c.JPC_CharacterVirtualSettings_SetShape(
+            @ptrCast(*c.JPC_CharacterVirtualSettings, in_settings),
+            @ptrCast(*c.JPC_Shape, in_shape),
+        );
+    }
+
     pub fn release(character_virtual_settings: *CharacterVirtualSettings) void {
         c.JPC_CharacterVirtualSettings_Release(@ptrCast(*c.JPC_CharacterVirtualSettings, character_virtual_settings));
     }
@@ -2314,6 +2321,48 @@ pub const CharacterVirtual = opaque {
 
     pub fn setRotation(character: *CharacterVirtual, in_rotation: [4]f32) void {
         c.JPC_CharacterVirtual_SetRotation(@ptrCast(*c.JPC_CharacterVirtual, character), &in_rotation);
+    }
+
+    pub fn getLinearVelocity(character: *CharacterVirtual) [3]Real {
+        var out_velocity: [3]Real = undefined;
+        c.JPC_CharacterVirtual_GetLinearVelocity(@ptrCast(*const c.JPC_CharacterVirtual, character), &out_velocity);
+        return out_velocity;
+    }
+
+    pub fn setLinearVelocity(character: *CharacterVirtual, in_velocity: [3]Real) void {
+        c.JPC_CharacterVirtual_SetLinearVelocity(@ptrCast(*c.JPC_CharacterVirtual, character), &in_velocity);
+    }
+
+    pub fn getUp(character: *CharacterVirtual) [3]Real {
+        var out_up: [3]Real = undefined;
+        c.JPC_CharacterVirtual_GetUp(@ptrCast(*const c.JPC_CharacterVirtual, character), &out_up);
+        return out_up;
+    }
+
+    pub fn setUp(character: *CharacterVirtual, in_up: [3]Real) void {
+        c.JPC_CharacterVirtual_SetUp(@ptrCast(*c.JPC_CharacterVirtual, character), &in_up);
+    }
+
+    pub const ExtendedUpdateSettings = extern struct {
+        stick_to_floor_step_down: [4]Real align(rvec_align) = .{ 0.0, -0.5, 0.0, 0.0 },
+        walk_stairs_step_up: [4]Real align(rvec_align) = .{ 0.0, 0.4, 0.0, 0.0 },
+        walk_stairs_min_step_forward: f32 = 0.02,
+        walk_stair_step_forward_test: f32 = 0.15,
+        walk_stairs_cos_anle_forward_contact: f32 = std.math.cos(std.math.degreesToRadians(f32, 75.0)),
+        walk_stairs_step_down_extra: [4]Real align(rvec_align) = .{ 0.0, 0.0, 0.0, 0.0 },
+    };
+
+    pub fn extendedUpdate(character: *CharacterVirtual, delta_time: f32, in_gravity: [3]Real, in_update_settings: ExtendedUpdateSettings, broadphase_layer: BroadPhaseLayer, object_layer: ObjectLayer, physics_system: *PhysicsSystem) void {
+        c.JPC_CharacterVirtual_ExtendedUpdate(
+            @ptrCast(*c.JPC_CharacterVirtual, character),
+            delta_time,
+            &in_gravity,
+            @ptrCast(*const c.JPC_CharacterVirtual_ExtendedUpdateSettings, &in_update_settings),
+            broadphase_layer,
+            object_layer,
+            @ptrCast(*c.JPC_TempAllocator, temp_allocator),
+            @ptrCast(*c.JPC_PhysicsSystem, physics_system),
+        );
     }
 };
 
@@ -3128,6 +3177,14 @@ test "zphysics.CharacterVirtual" {
     var character_virtual_settings = try CharacterVirtualSettings.create();
     defer character_virtual_settings.release();
 
+    var capsule_settings = try CapsuleShapeSettings.create(0.8, 0.3);
+    defer capsule_settings.release();
+
+    var capsule = try CapsuleShapeSettings.createShape(capsule_settings);
+    defer capsule.release();
+
+    character_virtual_settings.setShape(capsule);
+
     var initial_position = [_]Real{ 0.0, 5.0, 0.0 };
     var initial_rotation = [_]f32{ 0.0, 0.0, 0.0, 1.0 };
 
@@ -3160,6 +3217,33 @@ test "zphysics.CharacterVirtual" {
         var rotation = character_virtual.getRotation();
         try std.testing.expectEqualSlices(f32, &new_rotation, &rotation);
     }
+
+    // Velocity
+    {
+        var new_velocity = [_]Real{ 20.1, 10.0, 5.123 };
+        character_virtual.setLinearVelocity(new_velocity);
+        var velocity = character_virtual.getLinearVelocity();
+
+        try std.testing.expectEqualSlices(Real, &new_velocity, &velocity);
+    }
+
+    // Up
+    {
+        var new_up = [_]Real{ 20.1, 10.0, 5.123 };
+        character_virtual.setUp(new_up);
+        var up = character_virtual.getUp();
+
+        try std.testing.expectEqualSlices(Real, &new_up, &up);
+    }
+
+    character_virtual.extendedUpdate(
+        1.0,
+        physics_system.getGravity(),
+        .{},
+        0,
+        0,
+        physics_system,
+    );
 }
 
 test {

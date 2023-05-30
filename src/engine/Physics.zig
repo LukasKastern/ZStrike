@@ -9,11 +9,20 @@ const zm = Engine.zm;
 const ecs = Engine.ecs;
 
 pub const BoxShapeSettings = zphy.BoxShapeSettings;
+pub const CapsuleShapeSettings = zphy.CapsuleShapeSettings;
+pub const CharacterVirtual = zphy.CharacterVirtual;
+pub const CharacterVirtualSettings = zphy.CharacterVirtualSettings;
+pub const Shape = zphy.Shape;
+pub const Real = zphy.Real;
 
 pub const PhysicsShape = struct {
     shape_settings: union(enum) {
         Box: struct {
             extents: [3]f32,
+        },
+        Capsule: struct {
+            radius: f32,
+            half_height: f32,
         },
     },
 };
@@ -185,6 +194,13 @@ pub fn tickPhysics(it: *ecs.iter_t) callconv(.C) void {
                         .Box => |box| {
                             //TODO: Fix the error handling up (lukas)
                             var shape_settings = BoxShapeSettings.create(box.extents) catch unreachable;
+                            var shape = shape_settings.createShape() catch unreachable;
+                            shape_settings.release();
+
+                            break :blk shape;
+                        },
+                        .Capsule => |capsule| {
+                            var shape_settings = CapsuleShapeSettings.create(capsule.half_height, capsule.radius) catch unreachable;
                             var shape = shape_settings.createShape() catch unreachable;
                             shape_settings.release();
 
