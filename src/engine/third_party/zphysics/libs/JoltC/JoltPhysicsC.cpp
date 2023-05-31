@@ -217,6 +217,17 @@ FN(toJph)(const JPC_CharacterVirtual *in) { assert(in); return reinterpret_cast<
 FN(toJph)(JPC_CharacterVirtualSettings *in) { assert(in); return reinterpret_cast<JPH::CharacterVirtualSettings*>(in); }
 FN(toJph)(JPC_CharacterVirtual *in) { assert(in); return reinterpret_cast<JPH::CharacterVirtual*>(in); }
 
+FN(toJph)(JPC_CharacterBaseSettings *in) { assert(in); return reinterpret_cast<JPH::CharacterBaseSettings*>(in); }
+FN(toJph)(const JPC_CharacterBaseSettings *in) { assert(in); return reinterpret_cast<const JPH::CharacterBaseSettings*>(in); }
+
+FN(toJpc)(const JPH::CharacterBaseSettings *in) {
+    assert(in); return reinterpret_cast<const JPC_CharacterBaseSettings *>(in);
+}
+
+FN(toJpc)(JPH::CharacterBaseSettings *in) {
+    assert(in); return reinterpret_cast<JPC_CharacterBaseSettings*>(in);
+}
+
 FN(toJpc)(const JPH::CharacterVirtualSettings *in) {
     assert(in); return reinterpret_cast<const JPC_CharacterVirtualSettings*>(in);
 }
@@ -272,7 +283,7 @@ FN(toJpc)(JPH::EShapeSubType in) { return static_cast<JPC_ShapeSubType>(in); }
 FN(toJpc)(JPH::EMotionType in) { return static_cast<JPC_MotionType>(in); }
 FN(toJpc)(JPH::EActivation in) { return static_cast<JPC_Activation>(in); }
 FN(toJpc)(JPH::EMotionQuality in) { return static_cast<JPC_MotionQuality>(in); }
-
+FN(toJpc)(JPH::EBackFaceMode in) { return static_cast<JPC_BackFaceMode>(in); }
 
 #undef FN
 
@@ -2133,6 +2144,65 @@ JPC_BodyID_IsInvalid(JPC_BodyID in_body_id)
 
 //--------------------------------------------------------------------------------------------------
 //
+// JPC_CharacterBaseSettings 
+//
+//--------------------------------------------------------------------------------------------------
+JPC_API void
+JPC_CharacterBaseSettings_AddRef(JPC_CharacterBaseSettings *in_settings) 
+{
+    toJph(in_settings)->AddRef();
+}
+
+JPC_API void
+JPC_CharacterBaseSettings_Release(JPC_CharacterBaseSettings *in_settings)
+{
+    toJph(in_settings)->Release();
+}
+
+JPC_API uint32_t
+JPC_CharacterBaseSettings_GetRefCount(const JPC_CharacterBaseSettings *in_settings)
+{
+    return toJph(in_settings)->GetRefCount();
+}
+
+JPC_API void
+JPC_CharacterBaseSettings_SetShape(JPC_CharacterBaseSettings *in_settings, JPC_Shape *in_shape) {
+    toJph(in_settings)->mShape = toJph(in_shape);
+}
+
+JPC_API const JPC_Shape*
+JPC_CharacterBaseSettings_GetShape(const JPC_CharacterBaseSettings *in_settings ) {
+    return toJpc(toJph(in_settings)->mShape);
+}
+
+
+JPC_API void
+JPC_CharacterBaseSettings_GetUp(const JPC_CharacterBaseSettings *in_settings, JPC_Real out_up[3])
+{
+    storeRVec3(out_up, toJph(in_settings)->mUp);             
+}
+
+JPC_API void
+JPC_CharacterBaseSettings_SetUp(JPC_CharacterBaseSettings *in_settings, const JPC_Real in_up[3])
+{
+   toJph(in_settings)->mUp = loadRVec3(in_up);
+}
+
+
+JPC_API void
+JPC_CharacterBaseSettings_SetMaxSlopeAngle(JPC_CharacterBaseSettings *in_settings, float in_max_slope_angle)
+{
+    toJph(in_settings)->mMaxSlopeAngle = in_max_slope_angle;
+}
+
+JPC_API float
+JPC_CharacterBaseSettings_GetMaxSlopeAngle(const JPC_CharacterBaseSettings *in_settings)
+{
+     return toJph(in_settings)->mMaxSlopeAngle;
+}
+
+//--------------------------------------------------------------------------------------------------
+//
 // JPC_CharacterVirtualSettings
 //
 //--------------------------------------------------------------------------------------------------
@@ -2144,16 +2214,55 @@ JPC_CharacterVirtualSettings_Create()
     return toJpc(settings);
 }
 
+JPC_API float
+JPC_CharacterVirtualSettings_GetMass(const JPC_CharacterVirtualSettings *in_settings)
+{
+    return toJph(in_settings)->mMass;   
+}
+    
 JPC_API void
-JPC_CharacterVirtualSettings_SetShape(JPC_CharacterVirtualSettings *in_settings, JPC_Shape *in_shape) {
-    toJph(in_settings)->mShape = toJph(in_shape);
+JPC_CharacterVirtualSettings_SetMass(JPC_CharacterVirtualSettings *in_settings, float in_mass)
+{
+    toJph(in_settings)->mMass = in_mass;
+}
+
+JPC_API float
+JPC_CharacterVirtualSettings_GetMaxStrength(const JPC_CharacterVirtualSettings *in_settings)
+{
+    return toJph(in_settings)->mMaxStrength;   
+}
+    
+JPC_API void
+JPC_CharacterVirtualSettings_SetMaxStrength(JPC_CharacterVirtualSettings *in_settings, float in_max_strength)
+{
+    toJph(in_settings)->mMaxStrength = in_max_strength;
 }
 
 JPC_API void 
-JPC_CharacterVirtualSettings_Release(JPC_CharacterVirtualSettings *in_settings) 
+JPC_CharacterVirtualSettings_GetShapeOffset(const JPC_CharacterVirtualSettings *in_settings, JPC_Real out_shape_offset[3])
 {
-    toJph(in_settings)->Release();
+    storeRVec3(out_shape_offset, toJph(in_settings)->mShapeOffset);
+} 
+    
+JPC_API void
+JPC_CharacterVirtualSettings_SetShapeOffset(JPC_CharacterVirtualSettings *in_settings, const JPC_Real in_shape_offset[3])
+{
+    toJph(in_settings)->mShapeOffset = loadRVec3(in_shape_offset);
 }
+
+
+JPC_API JPC_BackFaceMode
+JPC_CharacterVirtualSettings_GetBackFaceMode(const JPC_CharacterVirtualSettings *in_settings)
+{
+    return toJpc(toJph(in_settings)->mBackFaceMode);
+} 
+    
+JPC_API void
+JPC_CharacterVirtualSettings_SetBackFaceMode(JPC_CharacterVirtualSettings *in_settings, JPC_BackFaceMode in_back_face_mode)
+{
+    toJph(in_settings)->mBackFaceMode = static_cast<JPH::EBackFaceMode>(in_back_face_mode);
+}
+
 
 //--------------------------------------------------------------------------------------------------
 //

@@ -203,6 +203,7 @@ typedef struct JPC_Shape           JPC_Shape;
 typedef struct JPC_PhysicsMaterial JPC_PhysicsMaterial;
 typedef struct JPC_GroupFilter     JPC_GroupFilter;
 
+typedef struct JPC_CharacterBaseSettings JPC_CharacterBaseSettings;
 typedef struct JPC_CharacterVirtualSettings JPC_CharacterVirtualSettings;
 typedef struct JPC_CharacterVirtual JPC_CharacterVirtual;
 //--------------------------------------------------------------------------------------------------
@@ -1413,6 +1414,33 @@ JPC_API bool
 JPC_BodyID_IsInvalid(JPC_BodyID in_body_id);
 //--------------------------------------------------------------------------------------------------
 
+JPC_API void
+JPC_CharacterBaseSettings_AddRef(JPC_CharacterBaseSettings *in_settings);
+
+JPC_API void
+JPC_CharacterBaseSettings_Release(JPC_CharacterBaseSettings *in_settings);
+
+JPC_API uint32_t
+JPC_CharacterBaseSettings_GetRefCount(const JPC_CharacterBaseSettings *in_settings);
+
+JPC_API const JPC_Shape*
+JPC_CharacterBaseSettings_GetShape(const JPC_CharacterBaseSettings *in_settings);
+
+JPC_API void 
+JPC_CharacterBaseSettings_SetShape(JPC_CharacterBaseSettings *in_settings, JPC_Shape* in_shape);
+
+JPC_API void
+JPC_CharacterBaseSettings_GetUp(const JPC_CharacterBaseSettings *in_settings, JPC_Real out_up[3]);
+
+JPC_API void
+JPC_CharacterBaseSettings_SetUp(JPC_CharacterBaseSettings *in_settings, const JPC_Real in_up[3]);
+
+JPC_API float
+JPC_CharacterBaseSettings_GetMaxSlopeAngle(const JPC_CharacterBaseSettings *in_settings);
+
+JPC_API void
+JPC_CharacterBaseSettings_SetMaxSlopeAngle(JPC_CharacterBaseSettings *in_settings, float in_max_slope_angle);
+    
 //--------------------------------------------------------------------------------------------------
 //
 // JPC_CharacterVirtualSettings
@@ -1421,12 +1449,41 @@ JPC_BodyID_IsInvalid(JPC_BodyID in_body_id);
 JPC_API JPC_CharacterVirtualSettings*
 JPC_CharacterVirtualSettings_Create();
 
-JPC_API void 
-JPC_CharacterVirtualSettings_SetShape(JPC_CharacterVirtualSettings *in_settings, JPC_Shape* in_shape);
+JPC_API float
+JPC_CharacterVirtualSettings_GetMass(const JPC_CharacterVirtualSettings *in_settings); 
     
 JPC_API void
-JPC_CharacterVirtualSettings_Release(JPC_CharacterVirtualSettings *in_settings);
+JPC_CharacterVirtualSettings_SetMass(JPC_CharacterVirtualSettings *in_settings, float in_mass);
+
+JPC_API float
+JPC_CharacterVirtualSettings_GetMaxStrength(const JPC_CharacterVirtualSettings *in_settings); 
     
+JPC_API void
+JPC_CharacterVirtualSettings_SetMaxStrength(JPC_CharacterVirtualSettings *in_settings, float in_max_strength);
+
+JPC_API void 
+JPC_CharacterVirtualSettings_GetShapeOffset(const JPC_CharacterVirtualSettings *in_settings, JPC_Real out_shape_offset[3]); 
+    
+JPC_API void
+JPC_CharacterVirtualSettings_SetShapeOffset(JPC_CharacterVirtualSettings *in_settings, const JPC_Real in_shape_offset[3]);
+
+JPC_API void
+JPC_CharacterVirtualSettings_SetBackFaceMode(JPC_CharacterVirtualSettings *in_settings, JPC_BackFaceMode mode);
+
+JPC_API JPC_BackFaceMode
+JPC_CharacterVirtualSettings_GetBackFaceMode(const JPC_CharacterVirtualSettings *in_settings);
+
+// BackfaceMode
+// PredictiveContactDistance
+// MaxCollisionIterations
+// MaxConstarintIterations
+// MinTimeRemaining
+// CollisionTollerance
+// CharacterPadding
+// MaxNumHits
+// HitReductionCosMaxAngle
+// PenetrationRecoverySpeed
+
 //--------------------------------------------------------------------------------------------------
 //
 // JPC_CharacterVirtual

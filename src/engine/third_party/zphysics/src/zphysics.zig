@@ -2256,12 +2256,82 @@ pub const Shape = opaque {
         };
     }
 };
+
+//--------------------------------------------------------------------------------------------------
+//
+// CharacterBaseSettings
+//
+//--------------------------------------------------------------------------------------------------
+pub const CharacterBaseSettings = opaque {
+    pub usingnamespace Methods(@This());
+
+    fn Methods(comptime T: type) type {
+        return struct {
+            pub fn addRef(shape: *T) void {
+                c.JPC_CharacterBaseSettings_AddRef(@ptrCast(*c.JPC_CharacterBaseSettings, shape));
+            }
+            pub fn release(shape: *T) void {
+                c.JPC_CharacterBaseSettings_Release(@ptrCast(*c.JPC_CharacterBaseSettings, shape));
+            }
+            pub fn getRefCount(shape: *const T) u32 {
+                return c.JPC_CharacterBaseSettings_GetRefCount(@ptrCast(*const c.JPC_CharacterBaseSettings, shape));
+            }
+
+            pub fn setShape(in_settings: *T, in_shape: *Shape) void {
+                c.JPC_CharacterBaseSettings_SetShape(
+                    @ptrCast(*c.JPC_CharacterBaseSettings, in_settings),
+                    @ptrCast(*c.JPC_Shape, in_shape),
+                );
+            }
+
+            pub fn getShape(in_settings: *const T) *const Shape {
+                var shape = c.JPC_CharacterBaseSettings_GetShape(
+                    @ptrCast(*const c.JPC_CharacterBaseSettings, in_settings),
+                );
+
+                return @ptrCast(*const Shape, shape);
+            }
+
+            pub fn getUp(in_settings: *const T) [3]Real {
+                var out_up: [3]Real = undefined;
+                c.JPC_CharacterBaseSettings_GetUp(
+                    @ptrCast(*const c.JPC_CharacterBaseSettings, in_settings),
+                    &out_up,
+                );
+                return out_up;
+            }
+
+            pub fn setUp(in_settings: *T, in_up: [3]Real) void {
+                c.JPC_CharacterBaseSettings_SetUp(
+                    @ptrCast(*c.JPC_CharacterBaseSettings, in_settings),
+                    &in_up,
+                );
+            }
+
+            pub fn getMaxSlopeAngle(in_settings: *const T) f32 {
+                return c.JPC_CharacterBaseSettings_GetMaxSlopeAngle(
+                    @ptrCast(*const c.JPC_CharacterBaseSettings, in_settings),
+                );
+            }
+
+            pub fn setMaxSlopeAngle(in_settings: *T, in_max_slope_angle: f32) void {
+                c.JPC_CharacterBaseSettings_SetMaxSlopeAngle(
+                    @ptrCast(*c.JPC_CharacterBaseSettings, in_settings),
+                    in_max_slope_angle,
+                );
+            }
+        };
+    }
+};
+
 //--------------------------------------------------------------------------------------------------
 //
 // CharacterVirtualSettings
 //
 //--------------------------------------------------------------------------------------------------
 pub const CharacterVirtualSettings = opaque {
+    pub usingnamespace CharacterBaseSettings.Methods(@This());
+
     pub fn create() !*CharacterVirtualSettings {
         const character_virtual_settings = c.JPC_CharacterVirtualSettings_Create();
         if (character_virtual_settings == null) {
@@ -2271,15 +2341,59 @@ pub const CharacterVirtualSettings = opaque {
         return @ptrCast(*CharacterVirtualSettings, character_virtual_settings);
     }
 
-    pub fn setShape(in_settings: *CharacterVirtualSettings, in_shape: *Shape) void {
-        c.JPC_CharacterVirtualSettings_SetShape(
-            @ptrCast(*c.JPC_CharacterVirtualSettings, in_settings),
-            @ptrCast(*c.JPC_Shape, in_shape),
+    pub fn getMass(in_settings: *const CharacterVirtualSettings) f32 {
+        return c.JPC_CharacterVirtualSettings_GetMass(
+            @ptrCast(*const c.JPC_CharacterVirtualSettings, in_settings),
         );
     }
 
-    pub fn release(character_virtual_settings: *CharacterVirtualSettings) void {
-        c.JPC_CharacterVirtualSettings_Release(@ptrCast(*c.JPC_CharacterVirtualSettings, character_virtual_settings));
+    pub fn setMass(in_settings: *CharacterVirtualSettings, in_mass: f32) void {
+        c.JPC_CharacterVirtualSettings_SetMass(
+            @ptrCast(*c.JPC_CharacterVirtualSettings, in_settings),
+            in_mass,
+        );
+    }
+
+    pub fn getMaxStrength(in_settings: *const CharacterVirtualSettings) f32 {
+        return c.JPC_CharacterVirtualSettings_GetMaxStrength(
+            @ptrCast(*const c.JPC_CharacterVirtualSettings, in_settings),
+        );
+    }
+
+    pub fn setMaxStrength(in_settings: *CharacterVirtualSettings, in_strength: f32) void {
+        c.JPC_CharacterVirtualSettings_SetMaxStrength(
+            @ptrCast(*c.JPC_CharacterVirtualSettings, in_settings),
+            in_strength,
+        );
+    }
+
+    pub fn getShapeOffset(in_settings: *const CharacterVirtualSettings) [3]Real {
+        var out_shape_offset: [3]Real = undefined;
+        c.JPC_CharacterVirtualSettings_GetShapeOffset(
+            @ptrCast(*const c.JPC_CharacterVirtualSettings, in_settings),
+            &out_shape_offset,
+        );
+        return out_shape_offset;
+    }
+
+    pub fn setShapeOffset(in_settings: *CharacterVirtualSettings, in_shape_offset: [3]Real) void {
+        c.JPC_CharacterVirtualSettings_SetShapeOffset(
+            @ptrCast(*c.JPC_CharacterVirtualSettings, in_settings),
+            &in_shape_offset,
+        );
+    }
+
+    pub fn getBackFaceMode(in_settings: *const CharacterVirtualSettings) BackFaceMode {
+        return @intToEnum(BackFaceMode, c.JPC_CharacterVirtualSettings_GetBackFaceMode(
+            @ptrCast(*const c.JPC_CharacterVirtualSettings, in_settings),
+        ));
+    }
+
+    pub fn setBackFaceMode(in_settings: *CharacterVirtualSettings, in_back_face_mode: BackFaceMode) void {
+        c.JPC_CharacterVirtualSettings_SetBackFaceMode(
+            @ptrCast(*c.JPC_CharacterVirtualSettings, in_settings),
+            @enumToInt(in_back_face_mode),
+        );
     }
 };
 
@@ -3177,6 +3291,54 @@ test "zphysics.CharacterVirtual" {
     var character_virtual_settings = try CharacterVirtualSettings.create();
     defer character_virtual_settings.release();
 
+    {
+        var new_up = [_]Real{ 1.0, 0.0, 0.0 };
+        character_virtual_settings.setUp(new_up);
+
+        var up = character_virtual_settings.getUp();
+        try std.testing.expectEqualSlices(Real, &new_up, &up);
+    }
+
+    {
+        var new_max_slope_angle = std.math.degreesToRadians(f32, 40);
+        character_virtual_settings.setMaxSlopeAngle(new_max_slope_angle);
+
+        var max_slope_angle = character_virtual_settings.getMaxSlopeAngle();
+        try std.testing.expectEqual(new_max_slope_angle, max_slope_angle);
+    }
+
+    {
+        var new_mass: f32 = 100.0;
+        character_virtual_settings.setMass(new_mass);
+
+        var mass = character_virtual_settings.getMass();
+        try std.testing.expectEqual(new_mass, mass);
+    }
+
+    {
+        var new_strength: f32 = 100.0;
+        character_virtual_settings.setMaxStrength(new_strength);
+
+        var strength = character_virtual_settings.getMaxStrength();
+        try std.testing.expectEqual(new_strength, strength);
+    }
+
+    {
+        var new_shape_offset = [_]Real{ 5.0, 1.0, 0.0 };
+        character_virtual_settings.setShapeOffset(new_shape_offset);
+
+        var shape_offset = character_virtual_settings.getShapeOffset();
+        try std.testing.expectEqualSlices(Real, &new_shape_offset, &shape_offset);
+    }
+
+    {
+        var new_back_face_mode: BackFaceMode = .ignore_back_faces;
+        character_virtual_settings.setBackFaceMode(new_back_face_mode);
+
+        var back_face_mode = character_virtual_settings.getBackFaceMode();
+        try std.testing.expectEqual(new_back_face_mode, back_face_mode);
+    }
+
     var capsule_settings = try CapsuleShapeSettings.create(0.8, 0.3);
     defer capsule_settings.release();
 
@@ -3184,6 +3346,11 @@ test "zphysics.CharacterVirtual" {
     defer capsule.release();
 
     character_virtual_settings.setShape(capsule);
+
+    {
+        var out_shape = character_virtual_settings.getShape();
+        try std.testing.expectEqual(@ptrCast(*const Shape, capsule), out_shape);
+    }
 
     var initial_position = [_]Real{ 0.0, 5.0, 0.0 };
     var initial_rotation = [_]f32{ 0.0, 0.0, 0.0, 1.0 };
