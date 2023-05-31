@@ -26,7 +26,7 @@ pub fn init(world: *ecs.world_t) !void {
     ecs.SYSTEM(
         world,
         "Determine Controlled Entity",
-        ecs.OnUpdate,
+        ecs.PreFrame,
         &determine_controlled_entity_system_desc,
     );
 

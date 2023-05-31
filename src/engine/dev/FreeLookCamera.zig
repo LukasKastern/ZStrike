@@ -148,12 +148,12 @@ pub fn init(world: *ecs.world_t) void {
         system_desc.query.filter.terms[2] = .{ .id = ecs.id(world, Core.Transform.Rotation) };
         system_desc.query.filter.terms[3] = .{ .id = ecs.id(world, Core.Gameplay.ControlledEntity) };
         system_desc.callback = updateFreeLookCamera;
-        ecs.SYSTEM(world, "Update Free Look Camera", ecs.PostFrame, &system_desc);
+        ecs.SYSTEM(world, "Update Free Look Camera", ecs.OnUpdate, &system_desc);
     }
 
     {
         var system_desc = ecs.system_desc_t{};
         system_desc.callback = toggleFreeLookCamera;
-        ecs.SYSTEM(world, "Toggle Free Look Camera", ecs.PostFrame, &system_desc);
+        ecs.SYSTEM(world, "Toggle Free Look Camera", ecs.OnUpdate, &system_desc);
     }
 }

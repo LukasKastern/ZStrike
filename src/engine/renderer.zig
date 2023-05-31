@@ -3,6 +3,7 @@ const std = @import("std");
 const ecs = @import("zflecs");
 const zm = @import("zmath");
 const zmesh = @import("zmesh");
+pub const GuiRendererDX12 = @import("renderer/GuiRendererDX12.zig");
 
 const Application = @import("application.zig");
 const Core = @import("Core.zig");

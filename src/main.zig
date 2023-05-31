@@ -3,13 +3,11 @@ const Application = Engine.Application;
 const Core = Engine.Core;
 const Renderer = Engine.Renderer;
 const Physics = Engine.Physics;
-
 const zm = Engine.zm;
 const ecs = Engine.ecs;
 const std = @import("std");
 
 const Character = @import("Character.zig");
-const FollowEntity = @import("FollowEntity.zig");
 const DefaultMap = @import("DefaultMap.zig");
 
 pub const PrototypeContent = struct {
@@ -96,7 +94,6 @@ pub fn main() !void {
     }
 
     try DefaultMap.SpawnEntites(world);
-    FollowEntity.init(world);
     Character.init(world);
 
     {
@@ -106,7 +103,7 @@ pub fn main() !void {
     }
 
     // Spawn test player
-    var player_model = Core.AssetImporting.loadAsset(world, "assets/prototype/military_RTS_character.glb");
+    var player_model = Core.AssetImporting.loadAsset(world, "assets/prototype/military_RTS_character_90180.glb");
     defer ecs.delete(world, player_model);
 
     var player_model_texture = Core.AssetImporting.loadAsset(world, "assets/prototype/textures/soldier1_diff.dds");
@@ -118,9 +115,8 @@ pub fn main() !void {
     var player = ecs.new_entity(world, "Test Player");
     {
         Core.Transform.addTransformToEntity(world, player, .{
-            .scale = zm.f32x4s(5.0),
+            .scale = zm.f32x4s(2.75),
             .position = zm.f32x4(0.0, 2.0, 0.0, 0),
-            .rotation = zm.quatFromRollPitchYaw(std.math.degreesToRadians(f32, 270), std.math.degreesToRadians(f32, 0), std.math.degreesToRadians(f32, 0)),
         });
 
         ecs.add(world, player, Renderer.RenderTransform);
@@ -134,10 +130,12 @@ pub fn main() !void {
 
         ecs.add_pair(world, player, ecs.id(world, Renderer.ShaderRef), pbr_shader);
 
-        _ = ecs.set(world, player, Character.CharacterController, .{ .physics_character = null });
-
+        Character.addCharacterComponent(world, player, .{
+            .third_person_model = player_model,
+        });
         _ = ecs.set(world, player, Core.Gameplay.ControlEntity, .{ .priority = 0 });
     }
+    defer ecs.delete(world, player);
 
     var camera = ecs.new_entity(world, "First Person Camera");
     {
@@ -145,13 +143,16 @@ pub fn main() !void {
         _ = ecs.set(
             world,
             camera,
-            FollowEntity,
+            Character.FirstPersonCamera,
             .{
-                .pos_offset = zm.f32x4s(0.0),
+                .pos_offset = zm.f32x4(0.0, 0.4, 0.0, 0.0),
                 .rot_offset = zm.quatFromRollPitchYaw(
-                    std.math.degreesToRadians(f32, -90),
-                    std.math.degreesToRadians(f32, 0),
-                    std.math.degreesToRadians(f32, 180),
+                    0,
+                    0,
+                    0,
+                    // std.math.degreesToRadians(f32, -90),
+                    // std.math.degreesToRadians(f32, 0),
+                    // std.math.degreesToRadians(f32, 180),
                 ),
                 .target = player,
             },
