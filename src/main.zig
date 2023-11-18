@@ -6,6 +6,7 @@ const Physics = Engine.Physics;
 const zm = Engine.zm;
 const ecs = Engine.ecs;
 const std = @import("std");
+const gm = @import("game_modes.zig");
 
 const Character = @import("Character.zig");
 const DefaultMap = @import("DefaultMap.zig");
@@ -95,6 +96,7 @@ pub fn main() !void {
 
     try DefaultMap.SpawnEntites(world);
     Character.init(world);
+    gm.init(world);
 
     {
         var spawn_cube_system_desc = ecs.system_desc_t{ .callback = spawnCube };
