@@ -167,7 +167,7 @@ pub const PlatformKeyCodes = enum(u8) {
 fn DefWindowProcA(hWnd: windows.HWND, Msg: windows.UINT, wParam: windows.WPARAM, lParam: windows.LPARAM, uIdOfSubclass: *windows.UINT, dwRefData: *windows.DWORD) callconv(windows.WINAPI) windows.LRESULT {
     _ = uIdOfSubclass;
 
-    var event_queue = @ptrCast(*std.ArrayList(WindowEvent), @alignCast(@alignOf(*std.ArrayList(WindowEvent)), dwRefData));
+    var event_queue = @as(*std.ArrayList(WindowEvent), @ptrCast(@alignCast(dwRefData)));
 
     var raw_input_buffer: [512]u8 = undefined;
 
@@ -188,14 +188,14 @@ fn DefWindowProcA(hWnd: windows.HWND, Msg: windows.UINT, wParam: windows.WPARAM,
         Platform.WM_KEYDOWN => {
             event_queue.append(.{
                 .KeyDown = .{
-                    .key = @intCast(u8, wParam),
+                    .key = @as(u8, @intCast(wParam)),
                 },
             }) catch @panic("OOM");
         },
         Platform.WM_KEYUP => {
             event_queue.append(.{
                 .KeyUp = .{
-                    .key = @intCast(u8, wParam),
+                    .key = @as(u8, @intCast(wParam)),
                 },
             }) catch @panic("OOM");
         },
@@ -219,7 +219,7 @@ fn DefWindowProcA(hWnd: windows.HWND, Msg: windows.UINT, wParam: windows.WPARAM,
             var num_bytes_out = Platform.GetRawInputData(lParam, Platform.RID_INPUT, &raw_input_buffer, &data_size, @sizeOf(Platform.RAWINPUTHEADER));
 
             if (num_bytes_out != 0) {
-                var raw_input: *Platform.RAWINPUT = @ptrCast(*Platform.RAWINPUT, @alignCast(@alignOf(Platform.RAWINPUT), &raw_input_buffer));
+                var raw_input: *Platform.RAWINPUT = @as(*Platform.RAWINPUT, @ptrCast(@alignCast(&raw_input_buffer)));
                 if (raw_input.header.dwType == Platform.RIM_TYPEMOUSE) {
                     event_queue.append(.{
                         .MouseMove = .{
@@ -273,14 +273,16 @@ fn pumpMessages(it: *ecs.iter_t) callconv(.C) void {
     }
 
     if (window_with_focus) |window| {
-        _ = Platform.ShowCursor(windows.FALSE);
+        // _ = Platform.ShowCursor(windows.FALSE);
 
         var rect: windows.RECT = undefined;
         if (Platform.GetWindowRect(window.handle, &rect) != 0) {
             var rect_width = rect.right - rect.left;
+            _ = rect_width;
             var rect_height = rect.top - rect.bottom;
+            _ = rect_height;
 
-            _ = Platform.SetCursorPos(rect.left + @divTrunc(rect_width, 2), rect.bottom + @divTrunc(rect_height, 2));
+            // _ = Platform.SetCursorPos(rect.left + @divTrunc(rect_width, 2), rect.bottom + @divTrunc(rect_height, 2));
         }
     } else {
         // _ = Platform.ShowCursor(windows.TRUE);
@@ -298,7 +300,7 @@ fn createWindows(it: *ecs.iter_t) callconv(.C) void {
     const window_array = ecs.field(it, Application.Window, 1).?;
 
     var module_handle = Platform.getModuleHandle(null);
-    var hinstance = @ptrCast(Platform.HInstance, @alignCast(@alignOf(Platform.HInstance), module_handle.?));
+    var hinstance = @as(Platform.HInstance, @ptrCast(@alignCast(module_handle.?)));
 
     const TempNameBufferLen = 1024;
     var temp_name: [TempNameBufferLen]u8 = undefined;
@@ -310,7 +312,7 @@ fn createWindows(it: *ecs.iter_t) callconv(.C) void {
         var event_queue = allocator.create(std.ArrayList(WindowEvent)) catch @panic("OOM");
         event_queue.* = std.ArrayList(WindowEvent).init(allocator);
 
-        var window_handle = Platform.createWindow(0, "default", @ptrCast([*:0]const u8, &temp_name), Platform.WS_OVERLAPPEDWINDOW, 0, 0, 2560, 1440, null, null, hinstance, null) catch |e| {
+        var window_handle = Platform.createWindow(0, "default", @as([*:0]const u8, @ptrCast(&temp_name)), Platform.WS_OVERLAPPEDWINDOW, 0, 0, 2560, 1440, null, null, hinstance, null) catch |e| {
             switch (e) {
                 else => {
                     std.log.err("Failed to create window. Error={s}", .{@errorName(e)});
@@ -319,7 +321,7 @@ fn createWindows(it: *ecs.iter_t) callconv(.C) void {
             }
         };
 
-        if (Platform.SetWindowSubclass(window_handle, DefWindowProcA, 1, @ptrCast(*u32, event_queue)) == 0) {
+        if (Platform.SetWindowSubclass(window_handle, DefWindowProcA, 1, @as(*u32, @ptrCast(event_queue))) == 0) {
             std.log.err("Failed to setup window proc. Error={}", .{Platform.getLastError()});
             continue :loop;
         }
@@ -376,7 +378,7 @@ fn initPlatform() !void {
     _ = Platform.setThreadPriority(Platform.getCurrentThread(), 15);
 
     var module_handle = Platform.getModuleHandle(null);
-    var hinstance = @ptrCast(Platform.HInstance, @alignCast(@alignOf(Platform.HInstance), module_handle.?));
+    var hinstance = @as(Platform.HInstance, @ptrCast(@alignCast(module_handle.?)));
 
     // Initialize Window Class
     {

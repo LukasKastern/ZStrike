@@ -139,7 +139,7 @@ pub fn flushActiveOperations(self: *Self) void {
 pub fn tickOperations(self: *Self) void {
     var operation_idx: isize = 0;
     while (operation_idx < self.active_operations.items.len) : (operation_idx += 1) {
-        var active_operation_idx = self.active_operations.items[@intCast(usize, operation_idx)];
+        var active_operation_idx = self.active_operations.items[@as(usize, @intCast(operation_idx))];
         var operation_slot = &self.operation_slots.items[active_operation_idx];
         std.debug.assert(operation_slot.in_use);
 
@@ -160,7 +160,7 @@ pub fn tickOperations(self: *Self) void {
             operation_slot.in_use = false;
 
             self.available_operation_slots.appendAssumeCapacity(active_operation_idx);
-            _ = self.active_operations.swapRemove(@intCast(usize, operation_idx));
+            _ = self.active_operations.swapRemove(@as(usize, @intCast(operation_idx)));
 
             operation_idx -= 1;
 

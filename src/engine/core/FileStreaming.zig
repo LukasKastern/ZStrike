@@ -144,7 +144,7 @@ pub fn getLoadStatus(self: Self, handle: FileHandle, out_file_data: *[]u8) LoadS
 pub fn tickFileStreaming(self: *Self) void {
     var i: isize = 0;
     while (i < self.loading_slots.items.len) : (i += 1) {
-        var slot_idx = self.loading_slots.items[@intCast(usize, i)];
+        var slot_idx = self.loading_slots.items[@as(usize, @intCast(i))];
         var slot = &self.files.items[slot_idx];
 
         std.debug.assert(slot.in_use);
@@ -152,7 +152,7 @@ pub fn tickFileStreaming(self: *Self) void {
         defer {
             // If the file finished loading remove it from the loading_slots collection.
             if (slot.load_status != .Loading) {
-                _ = self.loading_slots.swapRemove(@intCast(usize, i));
+                _ = self.loading_slots.swapRemove(@as(usize, @intCast(i)));
                 i -= 1;
 
                 if (slot.cancel) {

@@ -25,19 +25,19 @@ pub fn SampleArray(comptime num_samples: u32) type {
             var min = value;
             var max = value;
 
-            var num_valid_samples = std.math.min(num_samples, self.sample_sequence);
+            var num_valid_samples = @min(num_samples, self.sample_sequence);
             var idx: usize = 1;
             while (idx < num_valid_samples) : (idx += 1) {
                 var sample_at_idx = self.samples[(idx + self.sample_sequence) % num_samples];
                 avg_accumulator += sample_at_idx;
-                min = std.math.min(min, sample_at_idx);
-                max = std.math.max(max, sample_at_idx);
+                min = @min(min, sample_at_idx);
+                max = @max(max, sample_at_idx);
             }
 
             self.sample_sequence += 1;
             self.min = min;
             self.max = max;
-            self.avg = avg_accumulator / @intToFloat(f32, num_valid_samples);
+            self.avg = avg_accumulator / @as(f32, @floatFromInt(num_valid_samples));
         }
     };
 }
@@ -56,7 +56,7 @@ pub fn collectFrameStats(it: *ecs.iter_t) callconv(.C) void {
         var now_ns = std.time.nanoTimestamp();
 
         var elapsed_ns = now_ns - last_frame_time_ns;
-        var elapsed_ms = @intToFloat(f32, elapsed_ns) / @intToFloat(f32, std.time.ns_per_ms);
+        var elapsed_ms = @as(f32, @floatFromInt(elapsed_ns)) / @as(f32, @floatFromInt(std.time.ns_per_ms));
 
         stats.frame_time.addSample(elapsed_ms);
         stats.frame_start_time_ns = now_ns;

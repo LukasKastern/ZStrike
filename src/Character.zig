@@ -147,7 +147,7 @@ pub fn stepMovement(it: *ecs.iter_t) callconv(.C) void {
             prev_velocity *= zm.f32x4s(zm.max(speed - drop, 0.0) / speed);
         }
 
-        if (!zm.approxEqAbs(movement_input, zm.f32x4s(0.0), std.math.epsilon(f32))) {
+        if (!zm.approxEqAbs(movement_input, zm.f32x4s(0.0), std.math.floatEps(f32))) {
             movement_input = zm.mul(
                 movement_input,
                 zm.matFromQuat(

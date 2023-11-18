@@ -86,7 +86,7 @@ fn uploadTexture(render_state: *DX12RenderState, texture_to_upload: *UploadResou
     texture_desc = render_state.gctx.lookupResource(texture).?.GetDesc();
 
     for (0..texture_to_upload.sub_resources.items.len) |index| {
-        const subresource_index = @intCast(u32, index);
+        const subresource_index = @as(u32, @intCast(index));
 
         var layout: [1]d3d12.PLACED_SUBRESOURCE_FOOTPRINT = undefined;
         var num_rows: [1]u32 = undefined;
@@ -103,7 +103,7 @@ fn uploadTexture(render_state: *DX12RenderState, texture_to_upload: *UploadResou
             &required_size,
         );
 
-        const upload = render_state.gctx.allocateUploadBufferRegion(u8, @intCast(u32, required_size));
+        const upload = render_state.gctx.allocateUploadBufferRegion(u8, @as(u32, @intCast(required_size)));
         layout[0].Offset = upload.buffer_offset;
 
         var subresource = &texture_to_upload.sub_resources.items[subresource_index];
@@ -236,7 +236,7 @@ pub fn draw(it: *ecs.iter_t) callconv(.C) void {
                                     .{ .COPY_DEST = true },
                                     null,
                                 ) catch |err| hrPanic(err);
-                                const upload = self.gctx.allocateUploadBufferRegion(Vertex, @intCast(u32, all_vertices.items.len));
+                                const upload = self.gctx.allocateUploadBufferRegion(Vertex, @as(u32, @intCast(all_vertices.items.len)));
                                 for (all_vertices.items, 0..) |vertex, i| {
                                     upload.cpu_slice[i] = vertex;
                                 }
@@ -262,7 +262,7 @@ pub fn draw(it: *ecs.iter_t) callconv(.C) void {
                                     .{ .COPY_DEST = true },
                                     null,
                                 ) catch |err| hrPanic(err);
-                                const upload = self.gctx.allocateUploadBufferRegion(u32, @intCast(u32, mesh.indices.len));
+                                const upload = self.gctx.allocateUploadBufferRegion(u32, @as(u32, @intCast(mesh.indices.len)));
                                 for (mesh.indices, 0..) |index, i| {
                                     upload.cpu_slice[i] = index;
                                 }
@@ -357,7 +357,7 @@ pub fn draw(it: *ecs.iter_t) callconv(.C) void {
             );
             const cam_view_to_clip = zm.perspectiveFovLh(
                 std.math.pi / 3.0,
-                @intToFloat(f32, self.gctx.viewport_width) / @intToFloat(f32, self.gctx.viewport_height),
+                @as(f32, @floatFromInt(self.gctx.viewport_width)) / @as(f32, @floatFromInt(self.gctx.viewport_height)),
                 0.1,
                 100.0,
             );
@@ -388,25 +388,25 @@ pub fn draw(it: *ecs.iter_t) callconv(.C) void {
                 self.gctx.cmdlist.IASetPrimitiveTopology(.TRIANGLELIST);
                 self.gctx.cmdlist.IASetVertexBuffers(0, 1, &[_]d3d12.VERTEX_BUFFER_VIEW{.{
                     .BufferLocation = self.gctx.lookupResource(gpu_mesh.vertices).?.GetGPUVirtualAddress(),
-                    .SizeInBytes = @intCast(u32, self.gctx.getResourceSize(gpu_mesh.vertices)),
+                    .SizeInBytes = @as(u32, @intCast(self.gctx.getResourceSize(gpu_mesh.vertices))),
                     .StrideInBytes = @sizeOf(Vertex),
                 }});
 
                 // Set InstanceData
                 {
-                    const mem = self.gctx.allocateUploadMemory(Renderer.RenderTransform, @intCast(u32, instance_count));
+                    const mem = self.gctx.allocateUploadMemory(Renderer.RenderTransform, @as(u32, @intCast(instance_count)));
                     std.mem.copy(Renderer.RenderTransform, mem.cpu_slice, render_transforms);
 
                     self.gctx.cmdlist.IASetVertexBuffers(1, 1, &[_]d3d12.VERTEX_BUFFER_VIEW{.{
                         .BufferLocation = mem.gpu_base,
-                        .SizeInBytes = @intCast(u32, @sizeOf(Renderer.RenderTransform) * instance_count),
+                        .SizeInBytes = @as(u32, @intCast(@sizeOf(Renderer.RenderTransform) * instance_count)),
                         .StrideInBytes = @sizeOf(Renderer.RenderTransform),
                     }});
                 }
 
                 // Upload materials
                 {
-                    const mem = self.gctx.allocateUploadMemory(GPUMaterial, @intCast(u32, instance_count));
+                    const mem = self.gctx.allocateUploadMemory(GPUMaterial, @as(u32, @intCast(instance_count)));
 
                     for (mem.cpu_slice, material_array) |*gpu_material, input_mat| {
                         if (input_mat.textures.base_color != 0) {
@@ -424,14 +424,14 @@ pub fn draw(it: *ecs.iter_t) callconv(.C) void {
 
                     self.gctx.cmdlist.IASetVertexBuffers(2, 1, &[_]d3d12.VERTEX_BUFFER_VIEW{.{
                         .BufferLocation = mem.gpu_base,
-                        .SizeInBytes = @intCast(u32, @sizeOf(GPUMaterial) * instance_count),
+                        .SizeInBytes = @as(u32, @intCast(@sizeOf(GPUMaterial) * instance_count)),
                         .StrideInBytes = @sizeOf(GPUMaterial),
                     }});
                 }
 
                 self.gctx.cmdlist.IASetIndexBuffer(&.{
                     .BufferLocation = self.gctx.lookupResource(gpu_mesh.indices).?.GetGPUVirtualAddress(),
-                    .SizeInBytes = @intCast(u32, self.gctx.getResourceSize(gpu_mesh.indices)),
+                    .SizeInBytes = @as(u32, @intCast(self.gctx.getResourceSize(gpu_mesh.indices))),
                     .Format = .R32_UINT,
                 });
 
@@ -451,7 +451,7 @@ pub fn draw(it: *ecs.iter_t) callconv(.C) void {
 
                 // Draw cube.
                 {
-                    const object_to_world = zm.translation(@intToFloat(f32, 1) * 1.0, 0.0, 0.0); // zm.identity(); //zm.rotationY(@floatCast(f32, 0.25 * 5.0));
+                    const object_to_world = zm.translation(@as(f32, @floatFromInt(1)) * 1.0, 0.0, 0.0); // zm.identity(); //zm.rotationY(@floatCast(f32, 0.25 * 5.0));
 
                     const mem = self.gctx.allocateUploadMemory(Draw_Const, 1);
                     mem.cpu_slice[0] = .{
@@ -472,8 +472,8 @@ pub fn draw(it: *ecs.iter_t) callconv(.C) void {
                     // });
 
                     self.gctx.cmdlist.DrawIndexedInstanced(
-                        @intCast(c_uint, gpu_mesh.num_indices),
-                        @intCast(c_uint, instance_count),
+                        @as(c_uint, @intCast(gpu_mesh.num_indices)),
+                        @as(c_uint, @intCast(instance_count)),
                         0,
                         0,
                         0,
@@ -590,7 +590,7 @@ fn initializeWindowsRenderStats(it: *ecs.iter_t) callconv(.C) void {
     for (entities, native_windows) |entity, window| {
         var render_state = DX12RenderState{
             .allocator = allocator,
-            .gctx = zd3d12.GraphicsContext.init(allocator, @ptrCast(w32.HWND, window.handle)),
+            .gctx = zd3d12.GraphicsContext.init(allocator, @as(w32.HWND, @ptrCast(window.handle))),
             .depth_texture = undefined,
             .gui_renderer = undefined,
             .mesh_upload_query = mesh_upload_query,
@@ -697,8 +697,8 @@ pub fn beginGuiFrame(it: *ecs.iter_t) callconv(.C) void {
     var ui = GuiRendererDX12.c.igGetIO().?;
 
     ui.*.DisplaySize = GuiRendererDX12.c.ImVec2{
-        .x = @intToFloat(f32, render_state.gctx.viewport_width),
-        .y = @intToFloat(f32, render_state.gctx.viewport_height),
+        .x = @as(f32, @floatFromInt(render_state.gctx.viewport_width)),
+        .y = @as(f32, @floatFromInt(render_state.gctx.viewport_height)),
     };
     ui.*.DeltaTime = it.delta_time;
 

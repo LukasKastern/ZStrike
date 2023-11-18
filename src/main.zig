@@ -10,6 +10,7 @@ const gm = @import("game_modes.zig");
 
 const Character = @import("Character.zig");
 const DefaultMap = @import("DefaultMap.zig");
+const MainMenu = @import("MainMenu.zig");
 
 pub const PrototypeContent = struct {
     prototype_shader: ecs.entity_t,
@@ -79,6 +80,7 @@ pub fn main() !void {
 
     var world = engine.world;
 
+    // Initialize prototype content.
     {
         var prototype_black = Core.AssetImporting.loadAsset(world, "assets/prototype/Prototype1x1Black.dds");
         var prototype_red = Core.AssetImporting.loadAsset(world, "assets/prototype/Prototype1x1Red.dds");
@@ -96,6 +98,8 @@ pub fn main() !void {
 
     try DefaultMap.SpawnEntites(world);
     Character.init(world);
+    MainMenu.init(world);
+
     gm.init(world);
 
     {

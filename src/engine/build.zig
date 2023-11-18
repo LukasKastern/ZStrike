@@ -43,7 +43,7 @@ pub const Package = struct {
 
     pub fn link(pkg: Package, exe: *std.Build.CompileStep) void {
         exe.linkLibrary(pkg.imgui);
-        exe.addIncludePath(thisDir() ++ "/third_party/imgui/");
+        exe.addIncludePath(.{ .path = thisDir() ++ "/third_party/imgui/" });
 
         pkg.zd3d12.link(exe);
         pkg.zwin32.link(
@@ -139,13 +139,13 @@ pub fn package(
     imgui.linkLibCpp();
     imgui.linkSystemLibraryName("imm32");
 
-    imgui.addIncludePath(thisDir() ++ "/third_party/");
-    imgui.addCSourceFile(thisDir() ++ "/third_party/imgui/imgui.cpp", &.{""});
-    imgui.addCSourceFile(thisDir() ++ "/third_party/imgui/imgui_widgets.cpp", &.{""});
-    imgui.addCSourceFile(thisDir() ++ "/third_party/imgui/imgui_tables.cpp", &.{""});
-    imgui.addCSourceFile(thisDir() ++ "/third_party/imgui/imgui_draw.cpp", &.{""});
-    imgui.addCSourceFile(thisDir() ++ "/third_party/imgui/imgui_demo.cpp", &.{""});
-    imgui.addCSourceFile(thisDir() ++ "/third_party/imgui/cimgui.cpp", &.{""});
+    imgui.addIncludePath(.{ .path = thisDir() ++ "/third_party/" });
+    imgui.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/third_party/imgui/imgui.cpp" }, .flags = &.{""} });
+    imgui.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/third_party/imgui/imgui_widgets.cpp" }, .flags = &.{""} });
+    imgui.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/third_party/imgui/imgui_tables.cpp" }, .flags = &.{""} });
+    imgui.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/third_party/imgui/imgui_draw.cpp" }, .flags = &.{""} });
+    imgui.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/third_party/imgui/imgui_demo.cpp" }, .flags = &.{""} });
+    imgui.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/third_party/imgui/cimgui.cpp" }, .flags = &.{""} });
 
     var engine = b.addModule(
         "engine",
@@ -185,13 +185,13 @@ pub fn package(
 
     // Install game content.
     const install_content_step = b.addInstallDirectory(.{
-        .source_dir = args.options.game_content_dir,
+        .source_dir = .{ .path = args.options.game_content_dir },
         .install_dir = .{ .custom = "" },
         .install_subdir = "bin/" ++ content_dir,
     });
 
     const install_engine_content_step = b.addInstallDirectory(.{
-        .source_dir = thisDir() ++ "/engine_content",
+        .source_dir = .{ .path = thisDir() ++ "/engine_content" },
         .install_dir = .{ .custom = "" },
         .install_subdir = "bin/" ++ content_dir,
     });

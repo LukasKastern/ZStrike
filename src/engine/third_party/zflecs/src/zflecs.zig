@@ -322,8 +322,8 @@ pub const term_t = extern struct {
     first: term_id_t = .{},
     second: term_id_t = .{},
 
-    inout: inout_kind_t = @intToEnum(inout_kind_t, 0),
-    oper: oper_kind_t = @intToEnum(oper_kind_t, 0),
+    inout: inout_kind_t = @as(inout_kind_t, @enumFromInt(0)),
+    oper: oper_kind_t = @as(oper_kind_t, @enumFromInt(0)),
 
     id_flags: id_t = 0,
     name: ?[*:0]u8 = null,
@@ -602,10 +602,10 @@ pub const iter_t = extern struct {
     chain_it: ?*iter_t,
 
     pub fn entities(iter: iter_t) []entity_t {
-        return iter.entities_[0..@intCast(usize, iter.count_)];
+        return iter.entities_[0..@as(usize, @intCast(iter.count_))];
     }
     pub fn count(iter: iter_t) usize {
-        return @intCast(usize, iter.count_);
+        return @as(usize, @intCast(iter.count_));
     }
 };
 //--------------------------------------------------------------------------------------------------
@@ -823,7 +823,7 @@ pub fn init() *world_t {
     component_ids_hm.ensureTotalCapacity(32) catch @panic("OOM");
     const world = ecs_init();
 
-    ecs_set_context(world, @intToPtr(*anyopaque, next_world_id));
+    ecs_set_context(world, @as(*anyopaque, @ptrFromInt(next_world_id)));
     next_world_id += 1;
 
     Wildcard = EcsWildcard;
@@ -1065,11 +1065,11 @@ pub const make_pair = ecs_make_pair;
 extern fn ecs_make_pair(first: entity_t, second: entity_t) id_t;
 
 pub fn pair_first(pair_id: entity_t) entity_t {
-    return @intCast(entity_t, @truncate(u32, (pair_id & COMPONENT_MASK) >> 32));
+    return @as(entity_t, @intCast(@as(u32, @truncate((pair_id & COMPONENT_MASK) >> 32))));
 }
 
 pub fn pair_second(pair_id: entity_t) entity_t {
-    return @intCast(entity_t, @truncate(u32, pair_id));
+    return @as(entity_t, @intCast(@as(u32, @truncate(pair_id))));
 }
 //--------------------------------------------------------------------------------------------------
 //
@@ -2089,7 +2089,7 @@ pub fn set_pair(
     comptime T: type,
     val: T,
 ) entity_t {
-    return ecs_set_id(world, subject, pair(first, second), @sizeOf(T), @ptrCast(*const anyopaque, &val));
+    return ecs_set_id(world, subject, pair(first, second), @sizeOf(T), @as(*const anyopaque, @ptrCast(&val)));
 }
 
 pub fn remove_pair(world: *world_t, subject: entity_t, first: entity_t, second: entity_t) void {
@@ -2118,7 +2118,7 @@ pub fn typeName(comptime T: type) @TypeOf(@typeName(T)) {
 //
 //--------------------------------------------------------------------------------------------------
 pub fn set(world: *world_t, entity: entity_t, comptime T: type, val: T) entity_t {
-    return ecs_set_id(world, entity, id(world, T), @sizeOf(T), @ptrCast(*const anyopaque, &val));
+    return ecs_set_id(world, entity, id(world, T), @sizeOf(T), @as(*const anyopaque, @ptrCast(&val)));
 }
 
 pub fn get(world: *const world_t, entity: entity_t, comptime T: type) ?*const T {
@@ -2158,7 +2158,7 @@ pub fn override(world: *world_t, entity: entity_t, comptime T: type) void {
 
 pub fn field(it: *iter_t, comptime T: type, index: i32) ?[]T {
     if (ecs_field_w_size(it, @sizeOf(T), index)) |anyptr| {
-        const ptr = @ptrCast([*]T, @alignCast(@alignOf(T), anyptr));
+        const ptr = @as([*]T, @ptrCast(@alignCast(anyptr)));
         return ptr[0..it.count()];
     }
     return null;
@@ -2171,11 +2171,11 @@ pub inline fn id(world: *const world_t, comptime T: type) id_t {
 pub const pair = make_pair;
 
 pub fn cast(comptime T: type, val: ?*const anyopaque) *const T {
-    return @ptrCast(*const T, @alignCast(@alignOf(T), val));
+    return @as(*const T, @ptrCast(@alignCast(val)));
 }
 
 pub fn cast_mut(comptime T: type, val: ?*anyopaque) *T {
-    return @ptrCast(*T, @alignCast(@alignOf(T), val));
+    return @as(*T, @ptrCast(@alignCast(val)));
 }
 //--------------------------------------------------------------------------------------------------
 fn PerTypeGlobalVar(comptime T: type) type {
@@ -2257,7 +2257,7 @@ pub const ComponentsIdsLookup = struct {
         var tuples = perWorldTypesTuple(T);
 
         var world_id_opaque = ecs_get_context(world);
-        var world_id = @ptrToInt(world_id_opaque);
+        var world_id = @intFromPtr(world_id_opaque);
 
         var best_available_slot: ?*PerWorldTypeIdTuple = null;
         for (tuples) |*tuple| {
@@ -2286,7 +2286,7 @@ pub fn setPerTypeGlobalVar(world: *world_t, comptime T: anytype, value: id_t) vo
 }
 
 pub fn debTypeId(comptime _: type) usize {
-    return @ptrToInt(&struct {
+    return @intFromPtr(&struct {
         var x: u8 = 0;
     }.x);
 }

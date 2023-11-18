@@ -82,11 +82,11 @@ pub const PlatformInput = struct {
     }
 
     pub fn isKeyPressed(self: PlatformInput, key: Self.PlatformKeyCodes) bool {
-        return self.pressed_keys.isSet(@enumToInt(key));
+        return self.pressed_keys.isSet(@intFromEnum(key));
     }
 
     pub fn isKeyPressedThisFrame(self: PlatformInput, key: Self.PlatformKeyCodes) bool {
-        return !self.last_frame_pressed_keys.isSet(@enumToInt(key)) and self.pressed_keys.isSet(@enumToInt(key));
+        return !self.last_frame_pressed_keys.isSet(@intFromEnum(key)) and self.pressed_keys.isSet(@intFromEnum(key));
     }
 };
 

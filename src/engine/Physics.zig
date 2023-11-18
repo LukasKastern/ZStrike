@@ -72,9 +72,9 @@ pub fn initializeModule(world: *ecs.world_t) void {
     try zphy.init(allocator, .{});
 
     var physics_system = zphy.PhysicsSystem.create(
-        @ptrCast(*const zphy.BroadPhaseLayerInterface, broad_phase_layer_interface),
-        @ptrCast(*const zphy.ObjectVsBroadPhaseLayerFilter, object_vs_broad_phase_layer_filter),
-        @ptrCast(*const zphy.ObjectLayerPairFilter, object_layer_pair_filter),
+        @as(*const zphy.BroadPhaseLayerInterface, @ptrCast(broad_phase_layer_interface)),
+        @as(*const zphy.ObjectVsBroadPhaseLayerFilter, @ptrCast(object_vs_broad_phase_layer_filter)),
+        @as(*const zphy.ObjectLayerPairFilter, @ptrCast(object_layer_pair_filter)),
         .{
             .max_bodies = 1024,
             .num_body_mutexes = 0,
@@ -221,7 +221,7 @@ pub fn tickPhysics(it: *ecs.iter_t) callconv(.C) void {
 
                 _ = ecs.set(world, entity, PhysicsBodyState, .{
                     .body = body,
-                    .shape = @ptrCast(*zphy.Shape, shape),
+                    .shape = @as(*zphy.Shape, @ptrCast(shape)),
                 });
             }
         }
@@ -333,7 +333,7 @@ const BroadPhaseLayerInterface = extern struct {
         iself: *const zphy.BroadPhaseLayerInterface,
         layer: zphy.ObjectLayer,
     ) callconv(.C) zphy.BroadPhaseLayer {
-        const self = @ptrCast(*const BroadPhaseLayerInterface, iself);
+        const self = @as(*const BroadPhaseLayerInterface, @ptrCast(iself));
         return self.object_to_broad_phase[layer];
     }
 };

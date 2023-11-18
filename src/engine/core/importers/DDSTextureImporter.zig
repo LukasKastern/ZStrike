@@ -70,7 +70,7 @@ fn import(self: *AssetImporting.Importer, operation: *AssetImporting.Operation, 
 
     operation_data.importer = @fieldParentPtr(Self, "importer", self);
 
-    operation.importer_data = @ptrCast(*anyopaque, operation_data);
+    operation.importer_data = @as(*anyopaque, @ptrCast(operation_data));
     operation_data.state = .LoadingFile;
 
     return true;
@@ -80,7 +80,7 @@ fn finishImport(self: *AssetImporting.Importer, operation: *AssetImporting.Opera
     _ = @fieldParentPtr(Self, "importer", self);
 
     var file_streaming = ecs.get_mut(operation.world, ecs.id(operation.world, Core.FileStreaming), Core.FileStreaming).?;
-    var operation_data = @ptrCast(*OperationData, @alignCast(@alignOf(OperationData), operation.importer_data));
+    var operation_data = @as(*OperationData, @ptrCast(@alignCast(operation.importer_data)));
     file_streaming.freeHandle(operation_data.file_handle);
 }
 
@@ -88,7 +88,7 @@ fn stepImport(self: *AssetImporting.Importer, operation: *AssetImporting.Operati
     var importer = @fieldParentPtr(Self, "importer", self);
 
     var file_streaming = ecs.get_mut(operation.world, ecs.id(operation.world, Core.FileStreaming), Core.FileStreaming).?;
-    var operation_data = @ptrCast(*OperationData, @alignCast(@alignOf(OperationData), operation.importer_data));
+    var operation_data = @as(*OperationData, @ptrCast(@alignCast(operation.importer_data)));
 
     var file_data: []u8 = undefined;
     var result = file_streaming.getLoadStatus(operation_data.file_handle, &file_data);

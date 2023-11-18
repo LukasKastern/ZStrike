@@ -51,7 +51,7 @@ fn import(self: *AssetImporting.Importer, operation: *AssetImporting.Operation, 
 
     operation_data.importer = @fieldParentPtr(Self, "importer", self);
 
-    operation.importer_data = @ptrCast(*anyopaque, operation_data);
+    operation.importer_data = @as(*anyopaque, @ptrCast(operation_data));
     return true;
 }
 
@@ -59,7 +59,7 @@ fn finishImport(importer: *AssetImporting.Importer, operation: *AssetImporting.O
     _ = @fieldParentPtr(Self, "importer", importer);
 
     var file_streaming = ecs.get_mut(operation.world, ecs.id(operation.world, Core.FileStreaming), Core.FileStreaming).?;
-    var operation_data = @ptrCast(*OperationData, @alignCast(@alignOf(OperationData), operation.importer_data));
+    var operation_data = @as(*OperationData, @ptrCast(@alignCast(operation.importer_data)));
 
     file_streaming.freeHandle(operation_data.file_handle);
 }
@@ -68,7 +68,7 @@ fn stepImport(importer: *AssetImporting.Importer, operation: *AssetImporting.Ope
     var self = @fieldParentPtr(Self, "importer", importer);
 
     var file_streaming = ecs.get_mut(operation.world, ecs.id(operation.world, Core.FileStreaming), Core.FileStreaming).?;
-    var operation_data = @ptrCast(*OperationData, @alignCast(@alignOf(OperationData), operation.importer_data));
+    var operation_data = @as(*OperationData, @ptrCast(@alignCast(operation.importer_data)));
 
     var file_data: []u8 = undefined;
     var result = file_streaming.getLoadStatus(operation_data.file_handle, &file_data);
@@ -89,8 +89,8 @@ fn stepImport(importer: *AssetImporting.Importer, operation: *AssetImporting.Ope
     const mesh = &gltf_data.meshes.?[0];
     const prim = &mesh.primitives[0];
 
-    const num_vertices: u32 = @intCast(u32, prim.attributes[0].data.count);
-    const num_indices: u32 = @intCast(u32, prim.indices.?.count);
+    const num_vertices: u32 = @as(u32, @intCast(prim.attributes[0].data.count));
+    const num_indices: u32 = @as(u32, @intCast(prim.indices.?.count));
 
     var temp_indices = std.ArrayList(u32).init(operation.allocator);
     var positions = std.ArrayList([3]f32).init(operation.allocator);

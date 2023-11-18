@@ -60,7 +60,7 @@ fn updateFreeLookCamera(it: *ecs.iter_t) callconv(.C) void {
             movement_base_speed *= free_look_cam.boost_factor;
         }
 
-        if (!zm.all(zm.isNearEqual(movement_input, zm.f32x4s(0.0), zm.f32x4s(std.math.f32_epsilon)), 3)) {
+        if (!zm.all(zm.isNearEqual(movement_input, zm.f32x4s(0.0), zm.f32x4s(std.math.floatEps(f32))), 3)) {
             var input = zm.normalize3(movement_input) * zm.f32x4s(movement_base_speed);
 
             position.value += zm.mul(input, zm.matFromQuat(rotation.value));
@@ -68,8 +68,8 @@ fn updateFreeLookCamera(it: *ecs.iter_t) callconv(.C) void {
             ecs.modified_id(it.world, entity, ecs.id(world, Core.Transform.Position));
         }
 
-        if (!std.math.approxEqRel(f32, platform_input.mouse_pos[2], 0, std.math.f32_epsilon) or
-            !std.math.approxEqRel(f32, platform_input.mouse_pos[3], 0, std.math.f32_epsilon))
+        if (!std.math.approxEqRel(f32, platform_input.mouse_pos[2], 0, std.math.floatEps(f32)) or
+            !std.math.approxEqRel(f32, platform_input.mouse_pos[3], 0, std.math.floatEps(f32)))
         {
             free_look_cam.yaw += platform_input.mouse_pos[2] * delta_time * free_look_cam.yaw_rotation_speed;
             free_look_cam.pitch += platform_input.mouse_pos[3] * delta_time * free_look_cam.pitch_rotation_speed;

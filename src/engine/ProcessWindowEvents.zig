@@ -39,10 +39,10 @@ fn processWindowEvents(it: *ecs.iter_t) callconv(.C) void {
                         platform_input.pressed_keys.set(key_event.key);
                     },
                     .MouseMove => |move_event| {
-                        platform_input.mouse_pos[0] += @intToFloat(f32, move_event.move_x);
-                        platform_input.mouse_pos[1] += @intToFloat(f32, move_event.move_y);
-                        platform_input.mouse_pos[2] += @intToFloat(f32, move_event.move_x);
-                        platform_input.mouse_pos[3] += @intToFloat(f32, move_event.move_y);
+                        platform_input.mouse_pos[0] += @as(f32, @floatFromInt(move_event.move_x));
+                        platform_input.mouse_pos[1] += @as(f32, @floatFromInt(move_event.move_y));
+                        platform_input.mouse_pos[2] += @as(f32, @floatFromInt(move_event.move_x));
+                        platform_input.mouse_pos[3] += @as(f32, @floatFromInt(move_event.move_y));
                     },
                     .FocusChanged => |focus_changed| {
                         platform_input.has_focus = focus_changed.has_focus;

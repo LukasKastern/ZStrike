@@ -51,7 +51,7 @@ pub fn TypeMap(comptime name: []const u8, comptime TKey: type, comptime Value: t
         fn intToKey(i: Int) Key {
             return switch (index_info) {
                 .Int => i,
-                .Enum => @intToEnum(Key, i),
+                .Enum => @as(Key, @enumFromInt(i)),
                 else => unreachable,
             };
         }
@@ -64,7 +64,7 @@ pub fn TypeMap(comptime name: []const u8, comptime TKey: type, comptime Value: t
         fn keyToInt(k: Key) Int {
             return switch (index_info) {
                 .Int => k,
-                .Enum => @enumToInt(k),
+                .Enum => @intFromEnum(k),
                 else => unreachable,
             };
         }
@@ -74,11 +74,11 @@ pub fn TypeMap(comptime name: []const u8, comptime TKey: type, comptime Value: t
         }
 
         fn ptrToIndex(p: Ptr) usize {
-            return (@ptrToInt(p) - @ptrToInt(Head.ptr())) / ptr_size;
+            return (@intFromPtr(p) - @intFromPtr(Head.ptr())) / ptr_size;
         }
 
         fn ptrToInt(p: Ptr) Int {
-            return @truncate(Int, ptrToIndex(p));
+            return @as(Int, @truncate(ptrToIndex(p)));
         }
 
         fn ptrToKey(p: Ptr) Key {

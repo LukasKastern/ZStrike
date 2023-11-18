@@ -67,25 +67,22 @@ pub fn package(
     else
         "-DPAR_SHAPES_T=uint16_t";
 
-    zmesh_c_cpp.addIncludePath(thisDir() ++ "/libs/par_shapes");
-    zmesh_c_cpp.addCSourceFile(
-        thisDir() ++ "/libs/par_shapes/par_shapes.c",
-        &.{ "-std=c99", "-fno-sanitize=undefined", par_shapes_t },
-    );
+    zmesh_c_cpp.addIncludePath(.{ .path = thisDir() ++ "/libs/par_shapes" });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/par_shapes/par_shapes.c" }, .flags = &.{ "-std=c99", "-fno-sanitize=undefined", par_shapes_t } });
 
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/clusterizer.cpp", &.{""});
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/indexgenerator.cpp", &.{""});
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/vcacheoptimizer.cpp", &.{""});
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/vcacheanalyzer.cpp", &.{""});
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/vfetchoptimizer.cpp", &.{""});
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/vfetchanalyzer.cpp", &.{""});
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/overdrawoptimizer.cpp", &.{""});
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/overdrawanalyzer.cpp", &.{""});
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/simplifier.cpp", &.{""});
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/meshoptimizer/allocator.cpp", &.{""});
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/clusterizer.cpp" }, .flags = &.{""} });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/indexgenerator.cpp" }, .flags = &.{""} });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/vcacheoptimizer.cpp" }, .flags = &.{""} });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/vcacheanalyzer.cpp" }, .flags = &.{""} });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/vfetchoptimizer.cpp" }, .flags = &.{""} });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/vfetchanalyzer.cpp" }, .flags = &.{""} });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/overdrawoptimizer.cpp" }, .flags = &.{""} });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/overdrawanalyzer.cpp" }, .flags = &.{""} });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/simplifier.cpp" }, .flags = &.{""} });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/meshoptimizer/allocator.cpp" }, .flags = &.{""} });
 
-    zmesh_c_cpp.addIncludePath(thisDir() ++ "/libs/cgltf");
-    zmesh_c_cpp.addCSourceFile(thisDir() ++ "/libs/cgltf/cgltf.c", &.{"-std=c99"});
+    zmesh_c_cpp.addIncludePath(.{ .path = thisDir() ++ "/libs/cgltf" });
+    zmesh_c_cpp.addCSourceFile(.{ .file = .{ .path = thisDir() ++ "/libs/cgltf/cgltf.c" }, .flags = &.{"-std=c99"} });
 
     return .{
         .options = args.options,
