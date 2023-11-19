@@ -8,9 +8,7 @@ const ecs = Engine.ecs;
 const std = @import("std");
 const gm = @import("game_modes.zig");
 
-const Character = @import("Character.zig");
-const DefaultMap = @import("DefaultMap.zig");
-const MainMenu = @import("MainMenu.zig");
+const Game = @import("Game.zig");
 
 pub const PrototypeContent = struct {
     prototype_shader: ecs.entity_t,
@@ -96,15 +94,15 @@ pub fn main() !void {
         });
     }
 
-    try DefaultMap.SpawnEntites(world);
-    Character.init(world);
-    MainMenu.init(world);
+    try Game.DefaultMap.SpawnEntites(world);
+    Game.Character.init(world);
+    Game.UI.init(world);
+    Game.Network.init(world);
 
     gm.init(world);
 
     {
         var spawn_cube_system_desc = ecs.system_desc_t{ .callback = spawnCube };
-
         ecs.SYSTEM(world, "Spawn Cube", ecs.OnUpdate, &spawn_cube_system_desc);
     }
 

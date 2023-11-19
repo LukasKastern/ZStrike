@@ -13,13 +13,12 @@ const MainMenuState = struct {
     window_query: *ecs.query_t,
 };
 
-fn drawMainMenu(it: *ecs.iter_t) callconv(.C) void {
-    var main_menu_state_arr = ecs.field(it, MainMenuState, 1).?;
-    var main_menu_state = main_menu_state_arr[0];
+pub fn drawMainMenu(world: *ecs.world_t) void {
+    var main_menu_state = ecs.get_mut(world, ecs.id(world, MainMenuState), MainMenuState).?;
 
     //TODO: Ehhh we maybe should make the main window just a singleton. (lukas)
     var window_maybe: ?Application.Window = null;
-    var window_it = ecs.query_iter(it.world, main_menu_state.window_query);
+    var window_it = ecs.query_iter(world, main_menu_state.window_query);
     while (ecs.query_next(&window_it)) {
         var window_array = ecs.field(&window_it, Application.Window, 1).?;
 
@@ -81,8 +80,8 @@ fn drawMainMenu(it: *ecs.iter_t) callconv(.C) void {
 
         if (GuiRendererDX12.c.igButton("Quit", .{ .x = 200, .y = 50 })) {
             _ = ecs.set(
-                it.world,
-                ecs.id(it.world, Core.QuitApplication),
+                world,
+                ecs.id(world, Core.QuitApplication),
                 Core.QuitApplication,
                 .{
                     .reason = "Quit Pressed",
@@ -102,14 +101,4 @@ pub fn init(world: *ecs.world_t) void {
     ecs.setSingleton(world, MainMenuState, .{
         .window_query = window_query,
     });
-
-    {
-        var main_menu_query = ecs.system_desc_t{
-            .callback = drawMainMenu,
-        };
-
-        main_menu_query.query.filter.terms[0] = .{ .id = ecs.id(world, MainMenuState) };
-
-        ecs.SYSTEM(world, "MainMenuRender", ecs.OnUpdate, &main_menu_query);
-    }
 }
