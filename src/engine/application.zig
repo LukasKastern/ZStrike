@@ -40,10 +40,10 @@ pub const WindowHandle = struct {};
 pub const WindowEvent = union(enum) {
     CloseRequested: void,
     KeyDown: struct {
-        key: u8,
+        key: Self.PlatformKeyCodes,
     },
     KeyUp: struct {
-        key: u8,
+        key: Self.PlatformKeyCodes,
     },
     MouseMove: struct {
         move_x: i32,
@@ -64,10 +64,11 @@ pub const Window = struct {
     event_queue: ?*std.ArrayList(WindowEvent),
     title: []const u8,
     startup_mode: WindowMode = .FullScreen,
+
     has_focus: bool = false,
+
     cursor_mode: CursorMode = .Constrained,
     cursor_visible: bool = true,
-
     cursor_pos: [2]f32 = .{ 0.0, 0.0 },
     size: [2]f32 = .{ 0.0, 0.0 },
 };

@@ -36,6 +36,7 @@ const Platform = struct {
     pub extern "User32" fn GetWindowRect(hwnd: windows.HWND, outRect: *windows.RECT) callconv(windows.WINAPI) windows.BOOL;
     pub extern "User32" fn SetCursorPos(x: c_int, y: c_int) callconv(windows.WINAPI) windows.BOOL;
     pub extern "User32" fn GetCursorPos(point: *windows.POINT) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "User32" fn ScreenToClient(hwnd: windows.HWND, point: *windows.POINT) callconv(windows.WINAPI) windows.BOOL;
 
     pub extern "User32" fn ClipCursor(rect: ?*windows.RECT) callconv(windows.WINAPI) windows.BOOL;
 
@@ -148,6 +149,12 @@ const Platform = struct {
 
     pub const WM_INPUT = windows.user32.WM_INPUT;
     pub const WM_MOUSEMOVE = windows.user32.WM_MOUSEMOVE;
+    pub const WM_LBUTTONDOWN = windows.user32.WM_LBUTTONDOWN;
+    pub const WM_RBUTTONDOWN = windows.user32.WM_RBUTTONDOWN;
+
+    pub const WM_LBUTTONUP = windows.user32.WM_LBUTTONUP;
+    pub const WM_RBUTTONUP = windows.user32.WM_RBUTTONUP;
+
     pub const WM_KEYUP = windows.user32.WM_KEYUP;
     pub const WM_KEYDOWN = windows.user32.WM_KEYDOWN;
     pub const WM_DESTROY = windows.user32.WM_DESTROY;
@@ -156,6 +163,9 @@ const Platform = struct {
 };
 
 pub const PlatformKeyCodes = enum(u8) {
+    LButton = 0x1,
+    RButton = 0x2,
+
     A = 65,
     D = 68,
     W = 87,
@@ -165,6 +175,8 @@ pub const PlatformKeyCodes = enum(u8) {
     E = 0x45,
     Shift = 0x10,
     Space = 0x20,
+
+    _,
 };
 
 fn DefWindowProcA(hWnd: windows.HWND, Msg: windows.UINT, wParam: windows.WPARAM, lParam: windows.LPARAM, uIdOfSubclass: *windows.UINT, dwRefData: *windows.DWORD) callconv(windows.WINAPI) windows.LRESULT {
@@ -191,14 +203,42 @@ fn DefWindowProcA(hWnd: windows.HWND, Msg: windows.UINT, wParam: windows.WPARAM,
         Platform.WM_KEYDOWN => {
             event_queue.append(.{
                 .KeyDown = .{
-                    .key = @as(u8, @intCast(wParam)),
+                    .key = @enumFromInt(@as(u8, @intCast(wParam))),
                 },
             }) catch @panic("OOM");
         },
         Platform.WM_KEYUP => {
             event_queue.append(.{
                 .KeyUp = .{
-                    .key = @as(u8, @intCast(wParam)),
+                    .key = @enumFromInt(@as(u8, @intCast(wParam))),
+                },
+            }) catch @panic("OOM");
+        },
+        Platform.WM_RBUTTONUP => {
+            event_queue.append(.{
+                .KeyUp = .{
+                    .key = PlatformKeyCodes.RButton,
+                },
+            }) catch @panic("OOM");
+        },
+        Platform.WM_LBUTTONUP => {
+            event_queue.append(.{
+                .KeyUp = .{
+                    .key = PlatformKeyCodes.LButton,
+                },
+            }) catch @panic("OOM");
+        },
+        Platform.WM_RBUTTONDOWN => {
+            event_queue.append(.{
+                .KeyDown = .{
+                    .key = PlatformKeyCodes.RButton,
+                },
+            }) catch @panic("OOM");
+        },
+        Platform.WM_LBUTTONDOWN => {
+            event_queue.append(.{
+                .KeyDown = .{
+                    .key = PlatformKeyCodes.LButton,
                 },
             }) catch @panic("OOM");
         },
@@ -228,8 +268,6 @@ fn DefWindowProcA(hWnd: windows.HWND, Msg: windows.UINT, wParam: windows.WPARAM,
                         .MouseMove = .{
                             .move_x = raw_input.data.mouse.lLastX,
                             .move_y = raw_input.data.mouse.lLastY,
-                            .mouse_x = 0,
-                            .mouse_y = 0,
                         },
                     }) catch @panic("OOM");
                 }
@@ -267,14 +305,30 @@ fn pumpMessages(it: *ecs.iter_t) callconv(.C) void {
     var window_with_focus: ?*NativeWindow = null;
     var app_window_with_focus: ?Application.Window = null;
 
+    var win_cursor: windows.POINT = undefined;
+    _ = Platform.GetCursorPos(&win_cursor);
+
     while (ecs.query_next(&window_iter)) {
         var window_array = ecs.field(&window_iter, Application.Window, 1).?;
         var native_window_array = ecs.field(&window_iter, NativeWindow, 2).?;
 
-        for (window_array, native_window_array) |window, *native_window| {
+        for (window_array, native_window_array) |*window, *native_window| {
+            var win_rect: windows.RECT = undefined;
+            _ = Platform.GetWindowRect(native_window.handle, &win_rect);
+
+            window.size[0] = @floatFromInt(win_rect.right - win_rect.left);
+            window.size[1] = @floatFromInt(win_rect.bottom - win_rect.top);
+
+            // This remaps the world space cursor accounting for the titlebar and border.
+            var cursor_rel_to_native = win_cursor;
+            _ = Platform.ScreenToClient(native_window.handle, &cursor_rel_to_native);
+
+            window.cursor_pos[0] = @floatFromInt(cursor_rel_to_native.x);
+            window.cursor_pos[1] = @floatFromInt(cursor_rel_to_native.y);
+
             if (window.has_focus) {
                 window_with_focus = native_window;
-                app_window_with_focus = window;
+                app_window_with_focus = window.*;
             }
         }
     }
