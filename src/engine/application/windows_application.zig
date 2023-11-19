@@ -35,6 +35,7 @@ const Platform = struct {
 
     pub extern "User32" fn GetWindowRect(hwnd: windows.HWND, outRect: *windows.RECT) callconv(windows.WINAPI) windows.BOOL;
     pub extern "User32" fn SetCursorPos(x: c_int, y: c_int) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "User32" fn ClipCursor(rect: ?*windows.RECT) callconv(windows.WINAPI) windows.BOOL;
 
     pub extern "User32" fn ShowCursor(value: windows.BOOL) callconv(windows.WINAPI) c_int;
 
@@ -260,6 +261,7 @@ fn pumpMessages(it: *ecs.iter_t) callconv(.C) void {
 
     var window_iter = ecs.query_iter(it.world, native_application_data.window_query);
     var window_with_focus: ?*NativeWindow = null;
+    var app_window_with_focus: ?Application.Window = null;
 
     while (ecs.query_next(&window_iter)) {
         var window_array = ecs.field(&window_iter, Application.Window, 1).?;
@@ -268,24 +270,32 @@ fn pumpMessages(it: *ecs.iter_t) callconv(.C) void {
         for (window_array, native_window_array) |window, *native_window| {
             if (window.has_focus) {
                 window_with_focus = native_window;
+                app_window_with_focus = window;
             }
         }
     }
 
     if (window_with_focus) |window| {
-        // _ = Platform.ShowCursor(windows.FALSE);
+        var app_window = app_window_with_focus.?;
+
+        _ = Platform.ShowCursor(if (app_window.cursor_visible) windows.TRUE else windows.FALSE);
 
         var rect: windows.RECT = undefined;
         if (Platform.GetWindowRect(window.handle, &rect) != 0) {
-            var rect_width = rect.right - rect.left;
-            _ = rect_width;
-            var rect_height = rect.top - rect.bottom;
-            _ = rect_height;
+            const clip_cursor_rect = if (app_window.cursor_mode == .Constrained) &rect else null;
+            _ = Platform.ClipCursor(clip_cursor_rect);
 
-            // _ = Platform.SetCursorPos(rect.left + @divTrunc(rect_width, 2), rect.bottom + @divTrunc(rect_height, 2));
+            if (app_window.cursor_mode == .Locked) {
+                var rect_width = rect.right - rect.left;
+                var rect_height = rect.top - rect.bottom;
+
+                _ = Platform.SetCursorPos(rect.left + @divTrunc(rect_width, 2), rect.bottom + @divTrunc(rect_height, 2));
+            }
         }
     } else {
-        // _ = Platform.ShowCursor(windows.TRUE);
+        // TODO: Do we even need to do this? Shouldn't windows handle this for us? (lukas)
+        _ = Platform.ClipCursor(null);
+        _ = Platform.ShowCursor(windows.TRUE);
     }
 }
 

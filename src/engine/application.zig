@@ -54,11 +54,19 @@ pub const WindowEvent = union(enum) {
     },
 };
 
+pub const CursorMode = enum {
+    Constrained,
+    Locked,
+    Unlocked,
+};
+
 pub const Window = struct {
     event_queue: ?*std.ArrayList(WindowEvent),
     title: []const u8,
     startup_mode: WindowMode = .FullScreen,
     has_focus: bool = false,
+    cursor_mode: CursorMode = .Constrained,
+    cursor_visible: bool = true,
 };
 
 pub const PlatformInput = struct {
