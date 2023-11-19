@@ -1,5 +1,6 @@
 const std = @import("std");
 const Engine = @import("Engine");
+const Core = Engine.Core;
 const Physics = Engine.Physics;
 const Transform = Engine.Core.Transform;
 const Application = Engine.Application;
@@ -33,15 +34,17 @@ fn drawMainMenu(it: *ecs.iter_t) callconv(.C) void {
 
     var window = window_maybe.?;
 
-    const draw_data = GuiRendererDX12.c.igGetDrawData();
-
     GuiRendererDX12.c.igSetNextWindowPos(
         GuiRendererDX12.c.ImVec2{ .x = window.size[0] / 2.0, .y = window.size[1] / 2.0 },
         GuiRendererDX12.c.ImGuiCond_FirstUseEver,
         GuiRendererDX12.c.ImVec2{ .x = 0.5, .y = 0.5 },
     );
 
-    _ = draw_data;
+    GuiRendererDX12.c.igSetNextWindowSize(
+        .{ .x = window.size[0], .y = window.size[1] },
+        GuiRendererDX12.c.ImGuiCond_FirstUseEver,
+    );
+
     _ = GuiRendererDX12.c.igBegin(
         "MainMenu",
         null,
@@ -51,15 +54,42 @@ fn drawMainMenu(it: *ecs.iter_t) callconv(.C) void {
             GuiRendererDX12.c.ImGuiWindowFlags_NoResize |
             GuiRendererDX12.c.ImGuiWindowFlags_NoSavedSettings,
     );
-
-    if (GuiRendererDX12.c.igButton("Play", .{ .x = 200, .y = 30 })) {
-        std.log.info("Play clicked", .{});
-    }
-    if (GuiRendererDX12.c.igButton("Quit", .{ .x = 200, .y = 30 })) {
-        std.log.info("Quit clicked", .{});
-    }
-
     defer GuiRendererDX12.c.igEnd();
+
+    {
+        GuiRendererDX12.c.igSetNextWindowPos(
+            GuiRendererDX12.c.ImVec2{ .x = window.size[0] / 2.0, .y = window.size[1] / 2.0 },
+            0,
+            GuiRendererDX12.c.ImVec2{ .x = 0.5, .y = 0.5 },
+        );
+
+        _ = GuiRendererDX12.c.igBegin(
+            "MainMenu-Content",
+            null,
+            GuiRendererDX12.c.ImGuiWindowFlags_NoTitleBar |
+                GuiRendererDX12.c.ImGuiWindowFlags_NoMove |
+                GuiRendererDX12.c.ImGuiWindowFlags_ChildWindow |
+                GuiRendererDX12.c.ImGuiWindowFlags_NoBackground |
+                GuiRendererDX12.c.ImGuiWindowFlags_NoResize |
+                GuiRendererDX12.c.ImGuiWindowFlags_NoSavedSettings,
+        );
+        defer GuiRendererDX12.c.igEndChild();
+
+        if (GuiRendererDX12.c.igButton("Play", .{ .x = 200, .y = 50 })) {
+            std.log.info("Play clicked", .{});
+        }
+
+        if (GuiRendererDX12.c.igButton("Quit", .{ .x = 200, .y = 50 })) {
+            _ = ecs.set(
+                it.world,
+                ecs.id(it.world, Core.QuitApplication),
+                Core.QuitApplication,
+                .{
+                    .reason = "Quit Pressed",
+                },
+            );
+        }
+    }
 }
 
 pub fn init(world: *ecs.world_t) void {

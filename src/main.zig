@@ -118,54 +118,54 @@ pub fn main() !void {
     var pbr_shader = Core.AssetImporting.loadAsset(world, "assets/shaders/mesh_pbr.shader");
     defer ecs.delete(world, pbr_shader);
 
-    var player = ecs.new_entity(world, "Test Player");
-    {
-        Core.Transform.addTransformToEntity(world, player, .{
-            .scale = zm.f32x4s(2.75),
-            .position = zm.f32x4(0.0, 2.0, 0.0, 0),
-        });
+    // var player = ecs.new_entity(world, "Test Player");
+    // {
+    //     Core.Transform.addTransformToEntity(world, player, .{
+    //         .scale = zm.f32x4s(2.75),
+    //         .position = zm.f32x4(0.0, 2.0, 0.0, 0),
+    //     });
 
-        ecs.add(world, player, Renderer.RenderTransform);
+    //     ecs.add(world, player, Renderer.RenderTransform);
 
-        ecs.add_pair(world, player, ecs.id(world, Renderer.RenderMeshRef), player_model);
-        _ = ecs.set(world, player, Renderer.Material, .{
-            .textures = .{
-                .base_color = player_model_texture,
-            },
-        });
+    //     ecs.add_pair(world, player, ecs.id(world, Renderer.RenderMeshRef), player_model);
+    //     _ = ecs.set(world, player, Renderer.Material, .{
+    //         .textures = .{
+    //             .base_color = player_model_texture,
+    //         },
+    //     });
 
-        ecs.add_pair(world, player, ecs.id(world, Renderer.ShaderRef), pbr_shader);
+    //     ecs.add_pair(world, player, ecs.id(world, Renderer.ShaderRef), pbr_shader);
 
-        Character.addCharacterComponent(world, player, .{
-            .third_person_model = player_model,
-        });
-        _ = ecs.set(world, player, Core.Gameplay.ControlEntity, .{ .priority = 0 });
-    }
-    defer ecs.delete(world, player);
+    //     Character.addCharacterComponent(world, player, .{
+    //         .third_person_model = player_model,
+    //     });
+    //     _ = ecs.set(world, player, Core.Gameplay.ControlEntity, .{ .priority = 0 });
+    // }
+    // defer ecs.delete(world, player);
 
-    var camera = ecs.new_entity(world, "First Person Camera");
-    {
-        Core.Transform.addTransformToEntity(world, camera, .{});
-        _ = ecs.set(
-            world,
-            camera,
-            Character.FirstPersonCamera,
-            .{
-                .pos_offset = zm.f32x4(0.0, 0.4, 0.0, 0.0),
-                .rot_offset = zm.quatFromRollPitchYaw(
-                    0,
-                    0,
-                    0,
-                    // std.math.degreesToRadians(f32, -90),
-                    // std.math.degreesToRadians(f32, 0),
-                    // std.math.degreesToRadians(f32, 180),
-                ),
-                .target = player,
-            },
-        );
+    // var camera = ecs.new_entity(world, "First Person Camera");
+    // {
+    //     Core.Transform.addTransformToEntity(world, camera, .{});
+    //     _ = ecs.set(
+    //         world,
+    //         camera,
+    //         Character.FirstPersonCamera,
+    //         .{
+    //             .pos_offset = zm.f32x4(0.0, 0.4, 0.0, 0.0),
+    //             .rot_offset = zm.quatFromRollPitchYaw(
+    //                 0,
+    //                 0,
+    //                 0,
+    //                 // std.math.degreesToRadians(f32, -90),
+    //                 // std.math.degreesToRadians(f32, 0),
+    //                 // std.math.degreesToRadians(f32, 180),
+    //             ),
+    //             .target = player,
+    //         },
+    //     );
 
-        _ = ecs.set(world, camera, Renderer.Camera, .{ .priority = 0 });
-    }
+    //     _ = ecs.set(world, camera, Renderer.Camera, .{ .priority = 0 });
+    // }
 
     while (true) {
         engine.tick() catch |e| {
