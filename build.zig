@@ -33,7 +33,7 @@ pub fn build(b: *std.Build) void {
     } });
     engine_pkg.link(exe);
 
-    var install_artifact = b.addInstallArtifact(exe);
+    var install_artifact = b.addInstallArtifact(exe, .{});
     engine_pkg.install(install_artifact);
 
     var build_exe_step = b.step("client", "Build Client Exe");
