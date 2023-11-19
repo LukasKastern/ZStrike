@@ -67,6 +67,9 @@ pub const Window = struct {
     has_focus: bool = false,
     cursor_mode: CursorMode = .Constrained,
     cursor_visible: bool = true,
+
+    cursor_pos: [2]f32 = .{ 0.0, 0.0 },
+    size: [2]f32 = .{ 0.0, 0.0 },
 };
 
 pub const PlatformInput = struct {

@@ -35,6 +35,8 @@ const Platform = struct {
 
     pub extern "User32" fn GetWindowRect(hwnd: windows.HWND, outRect: *windows.RECT) callconv(windows.WINAPI) windows.BOOL;
     pub extern "User32" fn SetCursorPos(x: c_int, y: c_int) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "User32" fn GetCursorPos(point: *windows.POINT) callconv(windows.WINAPI) windows.BOOL;
+
     pub extern "User32" fn ClipCursor(rect: ?*windows.RECT) callconv(windows.WINAPI) windows.BOOL;
 
     pub extern "User32" fn ShowCursor(value: windows.BOOL) callconv(windows.WINAPI) c_int;
@@ -226,6 +228,8 @@ fn DefWindowProcA(hWnd: windows.HWND, Msg: windows.UINT, wParam: windows.WPARAM,
                         .MouseMove = .{
                             .move_x = raw_input.data.mouse.lLastX,
                             .move_y = raw_input.data.mouse.lLastY,
+                            .mouse_x = 0,
+                            .mouse_y = 0,
                         },
                     }) catch @panic("OOM");
                 }

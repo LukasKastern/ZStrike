@@ -6,6 +6,9 @@ const zm = @import("zmath");
 const QuitApplication = @import("Core.zig").QuitApplication;
 const Application = @import("application.zig");
 
+const Renderer = @import("renderer.zig");
+const GuiRendererDX12 = Renderer.GuiRendererDX12;
+
 fn processWindowEvents(it: *ecs.iter_t) callconv(.C) void {
     var world = it.world;
     var platform_input = ecs.get_mut(it.world, ecs.id(world, Application.PlatformInput), Application.PlatformInput).?;
@@ -56,11 +59,29 @@ fn processWindowEvents(it: *ecs.iter_t) callconv(.C) void {
     }
 }
 
+fn passInputToGUI(it: *ecs.iter_t) callconv(.C) void {
+    var world = it.world;
+    var platform_input = ecs.get_mut(it.world, ecs.id(world, Application.PlatformInput), Application.PlatformInput).?;
+
+    var mouse_x = platform_input.mouse_pos[0];
+    var mouse_y = platform_input.mouse_pos[1];
+
+    const io = GuiRendererDX12.c.igGetIO();
+    GuiRendererDX12.c.ImGuiIO_AddMousePosEvent(io, mouse_x, mouse_y);
+    std.log.info("Cusor Pos:  {}", .{ mouse_x, mouse_y });
+}
+
 pub fn loadModule(world: *ecs.world_t) void {
     {
         var system_desc = ecs.system_desc_t{};
         system_desc.query.filter.terms[0] = .{ .id = ecs.id(world, Application.Window) };
         system_desc.callback = processWindowEvents;
         ecs.SYSTEM(world, "Process Window Events", ecs.OnUpdate, &system_desc);
+    }
+
+    {
+        var system_desc = ecs.system_desc_t{};
+        system_desc.callback = passInputToGUI;
+        ecs.SYSTEM(world, "Forward Input To GUI", ecs.OnUpdate, &system_desc);
     }
 }
