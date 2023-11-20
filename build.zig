@@ -1,7 +1,10 @@
 const std = @import("std");
 const engine = @import("src/engine/build.zig");
+const enet_build = @import("src/engine/third_party/enet/build.zig");
 
 const content_dir = "assets/";
+
+const WorldType = @import("src/engine/system_collection.zig").WorldType;
 
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
@@ -18,7 +21,12 @@ pub fn build(b: *std.Build) void {
     // set a preferred release mode, allowing the user to decide how to optimize.
     const optimize = b.standardOptimizeOption(.{});
 
-    const exe = b.addExecutable(.{
+    // Enet
+    var enet_lib = enet_build.buildLibrary(b, optimize, target);
+    comptime var enet_dir = enet_build.thisDir();
+    var enet = b.addModule("enet", .{ .source_file = .{ .path = enet_dir ++ "/enet.zig" } });
+
+    const client_exe = b.addExecutable(.{
         .name = "ZStrike",
         // In this case the main source file is merely a path, however, in more
         // complicated build scripts, this could be a generated file.
@@ -27,20 +35,52 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    var engine_pkg = engine.package(b, target, optimize, .{ .options = .{
-        .game_content_dir = thisDir() ++ "/assets/",
-        .shaders = &[_]engine.ShaderToCompile{},
-    } });
-    engine_pkg.link(exe);
+    {
+        client_exe.addModule("enet", enet);
+        client_exe.linkLibrary(enet_lib);
 
-    var install_artifact = b.addInstallArtifact(exe, .{});
-    engine_pkg.install(install_artifact);
+        var client_options = b.addOptions();
+        client_options.addOption(WorldType, "WorldType", .Client);
+        client_exe.addOptions("game_options", client_options);
+    }
 
-    var build_exe_step = b.step("client", "Build Client Exe");
-    build_exe_step.dependOn(&install_artifact.step);
+    const server_exe = b.addExecutable(.{
+        .name = "ZStrike-Server",
+        // In this case the main source file is merely a path, however, in more
+        // complicated build scripts, this could be a generated file.
+        .root_source_file = .{ .path = "src/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
 
-    var run_exe_step = b.addRunArtifact(exe);
-    run_exe_step.step.dependOn(build_exe_step);
+    {
+        server_exe.addModule("enet", enet);
+        server_exe.linkLibrary(enet_lib);
+
+        var server_options = b.addOptions();
+        server_options.addOption(WorldType, "WorldType", .Server);
+        server_exe.addOptions("game_options", server_options);
+    }
+
+    var engine_pkg = engine.package(b, target, optimize, .{
+        .options = .{
+            .game_content_dir = thisDir() ++ "/assets/",
+            .shaders = &[_]engine.ShaderToCompile{},
+        },
+    });
+    engine_pkg.link(client_exe);
+    engine_pkg.link(server_exe);
+
+    var client_install_artifact = b.addInstallArtifact(client_exe, .{});
+    var server_install_artifact = b.addInstallArtifact(server_exe, .{});
+    engine_pkg.install(client_install_artifact);
+
+    var build_client_exe_step = b.step("client", "Build Client Exe");
+    build_client_exe_step.dependOn(&client_install_artifact.step);
+    build_client_exe_step.dependOn(&server_install_artifact.step);
+
+    var run_exe_step = b.addRunArtifact(client_exe);
+    run_exe_step.step.dependOn(build_client_exe_step);
 
     var run_client_step = b.step("run-client", "Run Client");
     run_client_step.dependOn(&run_exe_step.step);
