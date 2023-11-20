@@ -15,6 +15,7 @@ const std = @import("std");
 pub const EngineConfig = struct {
     window_name: []const u8 = "My Game",
     with_developer_content: bool = false,
+    world_type: SystemCollection.WorldType,
 };
 
 const Self = @This();
@@ -24,25 +25,27 @@ engine_config: EngineConfig,
 allocator: std.mem.Allocator,
 window: ecs.entity_t,
 
-pub fn init(allocator: std.mem.Allocator, config: EngineConfig) !Self {
+pub fn init(allocator: std.mem.Allocator, comptime config: EngineConfig) !Self {
     var world = ecs.init();
 
     ecs.os.ecs_os_api.log_ = nativeLogCallback;
     ecs.os.ecs_os_api.abort_ = nativeAbort;
     zmesh.init(allocator);
 
-    try SystemCollection.populateSystem(allocator, world, .Client);
+    try SystemCollection.populateSystem(allocator, world, config.world_type);
 
     var window = ecs.new_entity(world, "Main Window");
 
-    _ = ecs.set(world, window, Application.Window, .{
-        .event_queue = null,
-        .title = config.window_name,
-        .startup_mode = .FullScreen,
-    });
+    if (config.world_type == .Client) {
+        _ = ecs.set(world, window, Application.Window, .{
+            .event_queue = null,
+            .title = config.window_name,
+            .startup_mode = .FullScreen,
+        });
 
-    if (config.with_developer_content) {
-        FreeLookCamera.init(world);
+        if (config.with_developer_content) {
+            FreeLookCamera.init(world);
+        }
     }
 
     return .{

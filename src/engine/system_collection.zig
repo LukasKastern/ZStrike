@@ -7,22 +7,27 @@ const Renderer = @import("renderer.zig");
 
 const GameStats = @import("GameStats.zig");
 
-pub const WorldConfig = enum { Server, Client };
+pub const WorldType = enum { Server, Client };
 
 const Core = @import("Core.zig");
 
 const Modules = [_]type{
     Core,
     @import("Physics.zig"),
+};
+
+const ClientModules = [_]type{
     @import("renderer.zig"),
     @import("application.zig"),
     @import("input/Input.zig"),
 };
 
-pub fn populateSystem(allocator: std.mem.Allocator, world: *ecs.world_t, config: WorldConfig) !void {
-    try Core.initializeAllocators(world, allocator);
+pub fn populateSystem(allocator: std.mem.Allocator, world: *ecs.world_t, comptime config: WorldType) !void {
+    try Core.initializeAllocators(world, config, allocator);
 
-    inline for (Modules) |module| {
+    const all_modules = if (config == .Client) Modules ++ ClientModules else Modules;
+
+    inline for (all_modules) |module| {
         if (!@hasDecl(module, "preInitializeModule")) {
             @compileError(@typeName(module) ++ " missing declaration " ++ "preInitializeModule");
         }
@@ -30,7 +35,7 @@ pub fn populateSystem(allocator: std.mem.Allocator, world: *ecs.world_t, config:
         module.preInitializeModule(world);
     }
 
-    inline for (Modules) |module| {
+    inline for (all_modules) |module| {
         if (!@hasDecl(module, "initializeModule")) {
             @compileError(@typeName(module) ++ "missing declaration " ++ "initializeModule");
         }
@@ -38,10 +43,10 @@ pub fn populateSystem(allocator: std.mem.Allocator, world: *ecs.world_t, config:
         module.initializeModule(world);
     }
 
-    GameStats.loadModule(world);
-    ProcessWindowEvents.loadModule(world);
-    // _ = world;
-    _ = config;
+    if (config == .Client) {
+        GameStats.loadModule(world);
+        ProcessWindowEvents.loadModule(world);
+    }
 }
 
 pub fn deinit(world: *ecs.world_t) void {

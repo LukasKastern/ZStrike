@@ -106,7 +106,10 @@ pub fn init(allocator: std.mem.Allocator, world: *ecs.world_t) !Self {
         .operation_slots = try std.ArrayList(OperationSlot).initCapacity(allocator, MaxNumOperations),
         .active_operations = try std.ArrayList(usize).initCapacity(allocator, MaxNumOperations),
         .available_operation_slots = try std.ArrayList(usize).initCapacity(allocator, MaxNumOperations),
-        .importer_collection = .{ .extension_to_importers = std.array_hash_map.StringArrayHashMap(ImporterCollection.Importers).init(allocator), .all_importers = [_]?*Importer{null} ** 128 },
+        .importer_collection = .{
+            .extension_to_importers = std.array_hash_map.StringArrayHashMap(ImporterCollection.Importers).init(allocator),
+            .all_importers = [_]?*Importer{null} ** 128,
+        },
     };
 }
 

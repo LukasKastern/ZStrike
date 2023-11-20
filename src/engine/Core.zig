@@ -64,7 +64,7 @@ fn tickAssetImporting(iter: *ecs.iter_t) callconv(.C) void {
     asset_importing.tickOperations();
 }
 
-pub fn initializeAllocators(world: *ecs.world_t, persistent_allocator: std.mem.Allocator) !void {
+pub fn initializeAllocators(world: *ecs.world_t, comptime world_type: SystemCollection.WorldType, persistent_allocator: std.mem.Allocator) !void {
     ecs.COMPONENT(world, PersistentAllocator);
     ecs.COMPONENT(world, FrameAllocator);
     ecs.COMPONENT(world, AllocationStatePtr);
@@ -84,9 +84,11 @@ pub fn initializeAllocators(world: *ecs.world_t, persistent_allocator: std.mem.A
     var ddsImporter = DDSImporter.init(persistent_allocator, world) catch @panic("Failed to initialize dds importer");
     var shaderImporter = ShaderImporter.init(persistent_allocator, world) catch @panic("Failed to initialize shader importer");
 
-    asset_importing.importer_collection.addImporter(&gltfImporter.importer, &[_][]const u8{ ".gltf", ".glb" });
-    asset_importing.importer_collection.addImporter(&ddsImporter.importer, &[_][]const u8{".dds"});
-    asset_importing.importer_collection.addImporter(&shaderImporter.importer, &[_][]const u8{".shader"});
+    if (world_type == .Client) {
+        asset_importing.importer_collection.addImporter(&gltfImporter.importer, &[_][]const u8{ ".gltf", ".glb" });
+        asset_importing.importer_collection.addImporter(&ddsImporter.importer, &[_][]const u8{".dds"});
+        asset_importing.importer_collection.addImporter(&shaderImporter.importer, &[_][]const u8{".shader"});
+    }
 
     ecs.setSingleton(
         world,

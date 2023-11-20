@@ -68,9 +68,11 @@ pub fn main() !void {
 
     const gpa = general_purpose_allocator.allocator();
 
+    const world_type = .Server;
     var engine = try Engine.init(
         gpa,
         .{
+            .world_type = world_type,
             .with_developer_content = true,
         },
     );
@@ -93,28 +95,36 @@ pub fn main() !void {
             .prototype_tex_green = prototype_green,
         });
     }
-
-    try Game.DefaultMap.SpawnEntites(world);
-    Game.Character.init(world);
-    Game.UI.init(world);
-    Game.Network.init(world);
-
-    gm.init(world);
-
-    {
-        var spawn_cube_system_desc = ecs.system_desc_t{ .callback = spawnCube };
-        ecs.SYSTEM(world, "Spawn Cube", ecs.OnUpdate, &spawn_cube_system_desc);
+    std.debug.dumpCurrentStackTrace(null);
+    if (true) {
+        return error.smth;
     }
 
-    // Spawn test player
-    var player_model = Core.AssetImporting.loadAsset(world, "assets/prototype/military_RTS_character_90180.glb");
-    defer ecs.delete(world, player_model);
+    try Game.DefaultMap.SpawnEntites(world);
+    // Game.Character.init(world);
 
-    var player_model_texture = Core.AssetImporting.loadAsset(world, "assets/prototype/textures/soldier1_diff.dds");
-    defer ecs.delete(world, player_model_texture);
+    // if (world_type == .Client) {
+    //     Game.UI.init(world);
+    // }
 
-    var pbr_shader = Core.AssetImporting.loadAsset(world, "assets/shaders/mesh_pbr.shader");
-    defer ecs.delete(world, pbr_shader);
+    // Game.Network.init(world);
+
+    // gm.init(world);
+
+    // {
+    //     var spawn_cube_system_desc = ecs.system_desc_t{ .callback = spawnCube };
+    //     ecs.SYSTEM(world, "Spawn Cube", ecs.OnUpdate, &spawn_cube_system_desc);
+    // }
+
+    // // Spawn test player
+    // var player_model = Core.AssetImporting.loadAsset(world, "assets/prototype/military_RTS_character_90180.glb");
+    // defer ecs.delete(world, player_model);
+
+    // var player_model_texture = Core.AssetImporting.loadAsset(world, "assets/prototype/textures/soldier1_diff.dds");
+    // defer ecs.delete(world, player_model_texture);
+
+    // var pbr_shader = Core.AssetImporting.loadAsset(world, "assets/shaders/mesh_pbr.shader");
+    // defer ecs.delete(world, pbr_shader);
 
     // var player = ecs.new_entity(world, "Test Player");
     // {

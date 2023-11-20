@@ -30,6 +30,7 @@ pub fn SpawnEntites(world: *ecs.world_t) !void {
         const Helper = @This();
 
         fn spawn(self: Helper, transform: Core.Transform.TransformInit, base_color: ecs.entity_t) !void {
+            _ = base_color;
             var ent = ecs.new_entity(self.world, "");
 
             Core.Transform.addTransformToEntity(self.world, ent, transform);
@@ -45,19 +46,19 @@ pub fn SpawnEntites(world: *ecs.world_t) !void {
                 },
             });
 
-            _ = ecs.set(self.world, ent, Renderer.RenderTransform, undefined);
+            // _ = ecs.set(self.world, ent, Renderer.RenderTransform, undefined);
 
-            _ = ecs.set(
-                self.world,
-                ent,
-                Renderer.Material,
-                .{
-                    .textures = .{ .base_color = base_color },
-                },
-            );
+            // _ = ecs.set(
+            //     self.world,
+            //     ent,
+            //     Renderer.Material,
+            //     .{
+            //         .textures = .{ .base_color = base_color },
+            //     },
+            // );
 
-            ecs.add_pair(self.world, ent, ecs.id(self.world, Renderer.RenderMeshRef), self.primitives.cube);
-            ecs.add_pair(self.world, ent, ecs.id(self.world, Renderer.ShaderRef), self.shader);
+            // ecs.add_pair(self.world, ent, ecs.id(self.world, Renderer.RenderMeshRef), self.primitives.cube);
+            // ecs.add_pair(self.world, ent, ecs.id(self.world, Renderer.ShaderRef), self.shader);
         }
     };
 
