@@ -3,7 +3,7 @@ const ecs = @import("zflecs");
 
 const Renderer = @import("../../renderer.zig");
 
-const Core = @import("../../core.zig");
+const Core = @import("../../Core.zig");
 
 const zmesh = @import("zmesh");
 const zwin32 = @import("zwin32");

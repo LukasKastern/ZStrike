@@ -3,19 +3,19 @@ const ecs = @import("zflecs");
 
 pub const SystemCollection = @import("system_collection.zig");
 
-pub const Transform = @import("Core/Transform.zig");
-pub const Gameplay = @import("Core/Gameplay.zig");
+pub const Transform = @import("core/Transform.zig");
+pub const Gameplay = @import("core/Gameplay.zig");
 
-pub const AssetImporting = @import("Core/AssetImporting.zig");
-pub const FileStreaming = @import("Core/FileStreaming.zig");
-pub const QuitApplication = @import("Core/QuitApplication.zig");
+pub const AssetImporting = @import("core/AssetImporting.zig");
+pub const FileStreaming = @import("core/FileStreaming.zig");
+pub const QuitApplication = @import("core/QuitApplication.zig");
 
 pub const PersistentAllocator = struct { value: std.mem.Allocator };
 pub const FrameAllocator = struct { value: std.mem.Allocator };
 
-const GltfImporter = @import("Core/importers/GltfImporter.zig");
-const DDSImporter = @import("Core/importers/DDSTextureImporter.zig");
-const ShaderImporter = @import("Core/importers/ShaderImporter.zig");
+const GltfImporter = @import("core/importers/GltfImporter.zig");
+const DDSImporter = @import("core/importers/DDSTextureImporter.zig");
+const ShaderImporter = @import("core/importers/ShaderImporter.zig");
 
 pub fn preInitializeModule(world: *ecs.world_t) void {
     _ = world;

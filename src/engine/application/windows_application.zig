@@ -27,20 +27,20 @@ const Platform = struct {
 
     pub const SUBCLASSPROC = *const fn (hwnd: windows.HWND, uMsg: windows.UINT, wParam: windows.WPARAM, lParam: windows.LPARAM, uIdSubClass: *windows.UINT, dwRefData: *windows.DWORD) callconv(windows.WINAPI) windows.LRESULT;
 
-    pub extern "Comctl32" fn SetWindowSubclass(hwnd: windows.HWND, pfnSubclass: SUBCLASSPROC, uIdSubclass: windows.UINT, wdRefData: *windows.DWORD) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "comctl32" fn SetWindowSubclass(hwnd: windows.HWND, pfnSubclass: SUBCLASSPROC, uIdSubclass: windows.UINT, wdRefData: *windows.DWORD) callconv(windows.WINAPI) windows.BOOL;
 
-    pub extern "Winmm" fn timeBeginPeriod(uPeriod: windows.UINT) callconv(windows.WINAPI) windows.LRESULT;
+    pub extern "winmm" fn timeBeginPeriod(uPeriod: windows.UINT) callconv(windows.WINAPI) windows.LRESULT;
 
-    pub extern "Ole32" fn CoInitialize(reserved: ?windows.LPVOID) callconv(windows.WINAPI) windows.HRESULT;
+    pub extern "ole32" fn CoInitialize(reserved: ?windows.LPVOID) callconv(windows.WINAPI) windows.HRESULT;
 
-    pub extern "User32" fn GetWindowRect(hwnd: windows.HWND, outRect: *windows.RECT) callconv(windows.WINAPI) windows.BOOL;
-    pub extern "User32" fn SetCursorPos(x: c_int, y: c_int) callconv(windows.WINAPI) windows.BOOL;
-    pub extern "User32" fn GetCursorPos(point: *windows.POINT) callconv(windows.WINAPI) windows.BOOL;
-    pub extern "User32" fn ScreenToClient(hwnd: windows.HWND, point: *windows.POINT) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "user32" fn GetWindowRect(hwnd: windows.HWND, outRect: *windows.RECT) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "user32" fn SetCursorPos(x: c_int, y: c_int) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "user32" fn GetCursorPos(point: *windows.POINT) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "user32" fn ScreenToClient(hwnd: windows.HWND, point: *windows.POINT) callconv(windows.WINAPI) windows.BOOL;
 
-    pub extern "User32" fn ClipCursor(rect: ?*windows.RECT) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "user32" fn ClipCursor(rect: ?*windows.RECT) callconv(windows.WINAPI) windows.BOOL;
 
-    pub extern "User32" fn ShowCursor(value: windows.BOOL) callconv(windows.WINAPI) c_int;
+    pub extern "user32" fn ShowCursor(value: windows.BOOL) callconv(windows.WINAPI) c_int;
 
     pub const RAWINPUTDEVICE = extern struct {
         usUsagePage: windows.USHORT,
@@ -57,7 +57,7 @@ const Platform = struct {
     pub const RIM_TYPEKEYBOARD = 1;
     pub const RIM_TYPEHID = 2;
 
-    pub extern "User32" fn RegisterRawInputDevices(inputDevices: [*c]RAWINPUTDEVICE, uiNumDevices: windows.UINT, cbSize: windows.UINT) callconv(windows.WINAPI) windows.BOOL;
+    pub extern "user32" fn RegisterRawInputDevices(inputDevices: [*c]RAWINPUTDEVICE, uiNumDevices: windows.UINT, cbSize: windows.UINT) callconv(windows.WINAPI) windows.BOOL;
 
     pub const RAWINPUTHEADER = extern struct {
         dwType: windows.DWORD,
@@ -105,7 +105,7 @@ const Platform = struct {
         },
     };
 
-    pub extern "User32" fn GetRawInputData(
+    pub extern "user32" fn GetRawInputData(
         hRawInput: windows.LPARAM,
         uiCommand: windows.UINT,
         pData: windows.PVOID,
@@ -113,8 +113,9 @@ const Platform = struct {
         cbSizeHeader: windows.UINT,
     ) callconv(windows.WINAPI) windows.UINT;
 
-    pub extern "Kernel32" fn SetThreadPriority(hThread: Handle, priority: c_int) callconv(windows.WINAPI) windows.BOOL;
-    pub extern "Kernel32" fn GetCurrentThread() callconv(windows.WINAPI) Handle;
+    pub extern "kernel32" fn SetThreadPriority(hThread: Handle, priority: c_int) callconv(windows.WINAPI) windows.BOOL;
+
+    pub extern "kernel32" fn GetCurrentThread() callconv(windows.WINAPI) Handle;
 
     pub const registerClass = windows.user32.registerClassExA;
     pub const createWindow = windows.user32.createWindowExA;

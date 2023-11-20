@@ -3,7 +3,7 @@ const std = @import("std");
 const ecs = @import("zflecs");
 const application = @import("application.zig");
 const ProcessWindowEvents = @import("ProcessWindowEvents.zig");
-const Renderer = @import("Renderer.zig");
+const Renderer = @import("renderer.zig");
 
 const GameStats = @import("GameStats.zig");
 
